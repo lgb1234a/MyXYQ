@@ -1,0 +1,208 @@
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
+namespace Framework
+{
+    public enum EvaluationFunctionType {
+        Euclidean,
+        Manhattan,
+        Diagonal,
+    }
+
+    public class Node
+    {
+        Int2 m_position;
+        public Int2 position => m_position;
+        public Node parent;
+        
+        int m_g;
+        public int g {
+            get => m_g;
+            set {
+                m_g = value;
+                m_f = m_g + m_h;
+            }
+        }
+
+        int m_h;
+        public int h {
+            get => m_h;
+            set {
+                m_h = value;
+                m_f = m_g + m_h;
+            }
+        }
+
+        int m_f;
+        public int f => m_f;
+
+        public Node(Int2 pos, Node parent, int g, int h) {
+            m_position = pos;
+            this.parent = parent;
+            m_g = g;
+            m_h = h;
+            m_f = m_g + m_h;
+        }
+    }
+
+    public class AStar {
+        static int FACTOR = 10;
+        static int FACTOR_DIAGONAL = 14;
+        static int Obstacle_Value = 1;
+        static int Path_Value = -1;
+
+        bool m_isInit = false;
+        public bool isInit => m_isInit;
+
+        int[] m_map;
+        Int2 m_mapSize;
+        Int2 m_player, m_destination;
+        EvaluationFunctionType m_evaluationFunctionType;
+
+        Dictionary<Int2, Node> m_openDic = new Dictionary<Int2, Node>();
+        Dictionary<Int2, Node> m_closeDic = new Dictionary<Int2, Node>();
+
+        Node m_destinationNode;
+
+        public void Init(int[] map, Int2 mapSize, Int2 player, Int2 destination, EvaluationFunctionType type = EvaluationFunctionType.Diagonal) {
+            m_map = map;
+            m_mapSize = mapSize;
+            m_player = player;
+            m_destination = destination;
+            m_evaluationFunctionType = type;
+
+            m_openDic.Clear();
+            m_closeDic.Clear();
+
+            m_destinationNode = null;
+
+            AddNodeInOpenQueue(new Node(m_player, null, 0, 0));
+            m_isInit = true;
+        }
+
+        public IEnumerator Start() {
+            while(m_openDic.Count > 0 && m_destinationNode == null) {
+                m_openDic = m_openDic.OrderBy(kv => kv.Value.f).ToDictionary(p => p.Key, o => o.Value);
+                Node node = m_openDic.First().Value;
+                m_openDic.Remove(node.position);
+                OperateNeighborNode(node);
+                AddNodeInCloseDic(node);
+                yield return null;
+            }
+            if(m_destinationNode == null)
+                Debug.LogError("找不到可用路径");
+            else
+                ShowPath(m_destinationNode);
+        }
+
+        //处理相邻的节点
+        void OperateNeighborNode(Node node) {
+            for(int i = -1; i < 2; i++) {
+                for(int j = -1; j < 2; j++) {
+                    if(i == 0 && j == 0)
+                        continue;
+                    Int2 pos = new Int2(node.position.x + i, node.position.y + j);
+                    //超出地图范围
+                    if(pos.x < 0 || pos.x >= m_mapSize.x || pos.y < 0 || pos.y >= m_mapSize.y)
+                        continue;
+                    //已经处理过的节点
+                    if(m_closeDic.ContainsKey(pos))
+                        continue;
+                    //障碍物节点
+                    if(m_map[pos.GetMapGridIndex(m_mapSize.x)] == Obstacle_Value)
+                        continue;
+                    //将相邻节点加入open中
+                    if(i == 0 || j == 0)
+                        AddNeighborNodeInQueue(node, pos, FACTOR);
+                    else
+                        AddNeighborNodeInQueue(node, pos, FACTOR_DIAGONAL);
+                }
+            }
+        }
+
+        void AddNeighborNodeInQueue(Node parentNode, Int2 position, int g) {
+            int nodeG = parentNode.g + g;
+            if(m_openDic.ContainsKey(position)) {
+                if(nodeG < m_openDic[position].g) {
+                    m_openDic[position].g = nodeG;
+                    m_openDic[position].parent = parentNode;
+                    ShowOrUpdateAStarHint(m_openDic[position]);
+                }
+            }
+            else {
+                Node node = new Node(position, parentNode, nodeG, GetH(position));
+                if(position == m_destination)
+                    m_destinationNode = node;
+                else
+                    AddNodeInOpenQueue(node);
+            }
+        }
+
+        void AddNodeInOpenQueue(Node node) {
+            m_openDic[node.position] = node;
+            ShowOrUpdateAStarHint(node);
+        }
+
+        void ShowOrUpdateAStarHint(Node node) {
+            // m_map[node.position.x, node.position.y].ShowOrUpdateAStarHint(node.g, node.h, node.f,
+            //     node.parent == null ? Vector2.zero : new Vector2(node.parent.position.x - node.position.x, node.parent.position.y - node.position.y));
+        }
+
+        //加入close中，并更新网格状态
+        void AddNodeInCloseDic(Node node) {
+            m_closeDic.Add(node.position, node);
+            // m_map[node.position.x, node.position.y].ChangeInOpenStateToInClose();
+        }
+
+        void ShowPath(Node node) {
+            while(node != null) {
+                m_map[node.position.GetMapGridIndex(m_mapSize.x)] = Path_Value;
+                node = node.parent;
+            }
+        }
+
+        int GetH(Int2 position) {
+            if(m_evaluationFunctionType == EvaluationFunctionType.Manhattan)
+                return GetManhattanDistance(position);
+            else if(m_evaluationFunctionType == EvaluationFunctionType.Diagonal)
+                return GetDiagonalDistance(position);
+            else
+                return Mathf.CeilToInt(GetEuclideanDistance(position));
+        }
+
+        int GetDiagonalDistance(Int2 position) {
+            int x = Mathf.Abs(m_destination.x - position.x);
+            int y = Mathf.Abs(m_destination.y - position.y);
+            int min = Mathf.Min(x, y);
+            return min * FACTOR_DIAGONAL + Mathf.Abs(x - y) * FACTOR;
+        }
+
+        int GetManhattanDistance(Int2 position) {
+            return Mathf.Abs(m_destination.x - position.x) * FACTOR + Mathf.Abs(m_destination.y - position.y) * FACTOR;
+        }
+
+        float GetEuclideanDistance(Int2 position) {
+            return Mathf.Sqrt(Mathf.Pow((m_destination.x - position.x) * FACTOR, 2) + Mathf.Pow((m_destination.y - position.y) * FACTOR, 2));
+        }
+
+        public void Clear() {
+            foreach(var pos in m_openDic.Keys) {
+                // m_map[pos.x, pos.y].ClearAStarHint();
+                m_map[pos.GetMapGridIndex(m_mapSize.x)] = 0;
+            }
+            m_openDic.Clear();
+
+            foreach(var pos in m_closeDic.Keys) {
+                // m_map[pos.x, pos.y].ClearAStarHint();
+                m_map[pos.GetMapGridIndex(m_mapSize.x)] = 0;
+            }
+            m_closeDic.Clear();
+
+            m_destinationNode = null;
+
+            m_isInit = false;
+        }
+    }
+}
