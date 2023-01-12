@@ -13,8 +13,8 @@ namespace Framework
 
     public class Node
     {
-        Int2 m_position;
-        public Int2 position => m_position;
+        Vector2Int m_position;
+        public Vector2Int position => m_position;
         public Node parent;
         
         int m_g;
@@ -38,7 +38,7 @@ namespace Framework
         int m_f;
         public int f => m_f;
 
-        public Node(Int2 pos, Node parent, int g, int h) {
+        public Node(Vector2Int pos, Node parent, int g, int h) {
             m_position = pos;
             this.parent = parent;
             m_g = g;
@@ -52,22 +52,22 @@ namespace Framework
         static int FACTOR_DIAGONAL = 14;
 
         int[] m_map;
-        Int2 m_mapSize;
-        Int2 m_player, m_destination;
+        Vector2Int m_mapSize;
+        Vector2Int m_player, m_destination;
         EvaluationFunctionType m_evaluationFunctionType;
 
-        Dictionary<Int2, Node> m_openDic = new Dictionary<Int2, Node>();
-        Dictionary<Int2, Node> m_closeDic = new Dictionary<Int2, Node>();
+        Dictionary<Vector2Int, Node> m_openDic = new Dictionary<Vector2Int, Node>();
+        Dictionary<Vector2Int, Node> m_closeDic = new Dictionary<Vector2Int, Node>();
 
         Node m_destinationNode;
 
-        public void Init(int[] map, Int2 mapSize, EvaluationFunctionType type = EvaluationFunctionType.Diagonal) {
+        public void Init(int[] map, Vector2Int mapSize, EvaluationFunctionType type = EvaluationFunctionType.Diagonal) {
             m_map = map;
             m_mapSize = mapSize;
             m_evaluationFunctionType = type;
         }
 
-        public IEnumerator Start(Int2 player, Int2 destination) {
+        public IEnumerator Start(Vector2Int player, Vector2Int destination) {
             Clear();
             m_player = player;
             m_destination = destination;
@@ -93,7 +93,7 @@ namespace Framework
                 for(int j = -1; j < 2; j++) {
                     if(i == 0 && j == 0)
                         continue;
-                    Int2 pos = new Int2(node.position.x + i, node.position.y + j);
+                    Vector2Int pos = new Vector2Int(node.position.x + i, node.position.y + j);
                     //超出地图范围
                     if(pos.x < 0 || pos.x >= m_mapSize.x || pos.y < 0 || pos.y >= m_mapSize.y)
                         continue;
@@ -112,7 +112,7 @@ namespace Framework
             }
         }
 
-        void AddNeighborNodeInQueue(Node parentNode, Int2 position, int g) {
+        void AddNeighborNodeInQueue(Node parentNode, Vector2Int position, int g) {
             int nodeG = parentNode.g + g;
             if(m_openDic.ContainsKey(position)) {
                 if(nodeG < m_openDic[position].g) {
@@ -145,7 +145,7 @@ namespace Framework
             }
         }
 
-        int GetH(Int2 position) {
+        int GetH(Vector2Int position) {
             if(m_evaluationFunctionType == EvaluationFunctionType.Manhattan)
                 return GetManhattanDistance(position);
             else if(m_evaluationFunctionType == EvaluationFunctionType.Diagonal)
@@ -154,18 +154,18 @@ namespace Framework
                 return Mathf.CeilToInt(GetEuclideanDistance(position));
         }
 
-        int GetDiagonalDistance(Int2 position) {
+        int GetDiagonalDistance(Vector2Int position) {
             int x = Mathf.Abs(m_destination.x - position.x);
             int y = Mathf.Abs(m_destination.y - position.y);
             int min = Mathf.Min(x, y);
             return min * FACTOR_DIAGONAL + Mathf.Abs(x - y) * FACTOR;
         }
 
-        int GetManhattanDistance(Int2 position) {
+        int GetManhattanDistance(Vector2Int position) {
             return Mathf.Abs(m_destination.x - position.x) * FACTOR + Mathf.Abs(m_destination.y - position.y) * FACTOR;
         }
 
-        float GetEuclideanDistance(Int2 position) {
+        float GetEuclideanDistance(Vector2Int position) {
             return Mathf.Sqrt(Mathf.Pow((m_destination.x - position.x) * FACTOR, 2) + Mathf.Pow((m_destination.y - position.y) * FACTOR, 2));
         }
 

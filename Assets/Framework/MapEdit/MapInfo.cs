@@ -27,19 +27,19 @@ namespace Framework
             m_columns = columns;
         }
 
-        public void SetGridValue(Int2 coordinate, int value)
+        public void SetGridValue(Vector2Int coordinate, int value)
         {
             m_gridValues[GridCoordinate2Index(coordinate)] = value;
         }
 
-        public Int2 GridIndex2Coordinate(int index)
+        public Vector2Int GridIndex2Coordinate(int index)
         {
             int x = index / m_rows;
             int y = index % m_columns;
-            return new Int2(x, y);
+            return new Vector2Int(x, y);
         }
 
-        public int GridCoordinate2Index(Int2 coordinate)
+        public int GridCoordinate2Index(Vector2Int coordinate)
         {
             int index = coordinate.x*m_rows + coordinate.y;
             return index;
@@ -47,7 +47,7 @@ namespace Framework
 
         public Vector2 GridIndex2WorldPosition(int index)
         {
-            Int2 coordinate = GridIndex2Coordinate(index);
+            Vector2Int coordinate = GridIndex2Coordinate(index);
             float positionX = coordinate.x * m_gridWidth + m_gridWidth * 0.5f;
             float positionY = coordinate.y * m_gridHeight + m_gridHeight * 0.5f;
             return new Vector2(positionX, positionY);

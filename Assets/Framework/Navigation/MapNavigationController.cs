@@ -7,46 +7,6 @@ using UnityEditor;
 
 namespace Framework
 {
-    
-    public struct Int2
-    {
-        public int x;
-        public int y;
-
-        public Int2(int x, int y) {
-            this.x = x;
-            this.y = y;
-        }
-
-        public int GetMapGridIndex(int rows)
-        {
-            return this.x * rows + this.y;
-        }
-
-        public override string ToString() {
-            return $"x:{x.ToString()}   y:{y.ToString()}";
-        }
-
-        public override int GetHashCode() {
-            return x ^ (y * 256);
-        }
-
-        public override bool Equals(object obj) {
-            if(obj.GetType() != typeof(Int2))
-                return false;
-            Int2 int2 = (Int2)obj;
-            return x == int2.x && y == int2.y;
-        }
-
-        public static bool operator ==(Int2 a, Int2 b) {
-            return a.Equals(b);
-        }
-
-        public static bool operator !=(Int2 a, Int2 b) {
-            return !a.Equals(b);
-        }
-    }
-
     public class MapNavigationController : MonoBehaviour
     {
         public GameObject m_flag;
@@ -62,8 +22,8 @@ namespace Framework
 
         bool m_inSettingPlayerLocation;
         bool m_inSettingDestinationLocation;
-        Int2 m_playerLocation;
-        Int2 m_destinationLocation;
+        Vector2Int m_playerLocation;
+        Vector2Int m_destinationLocation;
 
         void Start()
         {
@@ -75,7 +35,7 @@ namespace Framework
             string path = "Assets/Resources/Text/Map/MWZ.txt";
             m_mapInfo = MapInfo.ImportFromFile(path);
 
-            var mapSize = new Int2(m_mapInfo.m_rows, m_mapInfo.m_columns);
+            var mapSize = new Vector2Int(m_mapInfo.m_rows, m_mapInfo.m_columns);
             m_aStar.Init(m_mapInfo.m_gridValues, mapSize, m_evaluationFunctionType);
             ShowObstacles();
         }
@@ -171,13 +131,13 @@ namespace Framework
                         
                         if (m_inSettingPlayerLocation)
                         {
-                            m_playerLocation = new Int2(tx, ty);
+                            m_playerLocation = new Vector2Int(tx, ty);
                             m_mapInfo.SetGridValue(m_playerLocation, MapInfo.Path_Value);
                             InstantiatePathFlag(new Vector2(hitInfo.point.x, hitInfo.point.y));
                         }
                         else if (m_inSettingDestinationLocation)
                         {
-                            m_destinationLocation = new Int2(tx, ty);
+                            m_destinationLocation = new Vector2Int(tx, ty);
                             m_mapInfo.SetGridValue(m_destinationLocation, MapInfo.Path_Value);
                             InstantiatePathFlag(new Vector2(hitInfo.point.x, hitInfo.point.y));
                         }
