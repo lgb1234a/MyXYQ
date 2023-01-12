@@ -386,11 +386,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_flag: {fileID: 921518067}
-  m_abstacleFlag: {fileID: 617086304}
+  m_ObstacleFlag: {fileID: 617086304}
   m_setPlayerLocationBtn: {fileID: 980678860}
   m_setDestinationBtn: {fileID: 2021370775}
   m_aStarButton: {fileID: 39550273}
-  m_isStepOneByOne: 0
   m_evaluationFunctionType: 1
 --- !u!1 &401653657
 GameObject:
@@ -489,7 +488,7 @@ GameObject:
   - component: {fileID: 617086306}
   - component: {fileID: 617086305}
   m_Layer: 0
-  m_Name: AbstalceFlag
+  m_Name: ObstalceFlag
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

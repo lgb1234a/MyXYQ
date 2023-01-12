@@ -50,11 +50,10 @@ namespace Framework
     public class MapNavigationController : MonoBehaviour
     {
         public GameObject m_flag;
-        public GameObject m_abstacleFlag;
+        public GameObject m_ObstacleFlag;
         public Button m_setPlayerLocationBtn;
         public Button m_setDestinationBtn;
         public Button m_aStarButton;
-        public bool m_isStepOneByOne;
         public EvaluationFunctionType m_evaluationFunctionType = EvaluationFunctionType.Manhattan;
 
         AStar m_aStar;
@@ -66,8 +65,6 @@ namespace Framework
         Int2 m_playerLocation;
         Int2 m_destinationLocation;
 
-        List<GameObject> m_flags = new List<GameObject>();
-
         void Start()
         {
             m_setPlayerLocationBtn.onClick.AddListener(OnClickedPlayerLocationBtn);
@@ -77,7 +74,10 @@ namespace Framework
             m_aStar = new AStar();
             string path = "Assets/Resources/Text/Map/MWZ.txt";
             m_mapInfo = MapInfo.ImportFromFile(path);
-            ShowAbstacles();
+
+            var mapSize = new Int2(m_mapInfo.m_rows, m_mapInfo.m_columns);
+            m_aStar.Init(m_mapInfo.m_gridValues, mapSize, m_evaluationFunctionType);
+            ShowObstacles();
         }
 
         void OnClickedPlayerLocationBtn()
@@ -92,39 +92,31 @@ namespace Framework
 
         void OnClickedAStarBtn()
         {
-            if(!m_aStar.isInit) {
-                var mapSize = new Int2(m_mapInfo.m_rows, m_mapInfo.m_columns);
-                m_aStar.Init(m_mapInfo.m_gridValues, mapSize, m_playerLocation, m_destinationLocation, m_evaluationFunctionType);
-                m_aStarProcess = m_aStar.Start();
-            }
-            if(m_isStepOneByOne) {
-                if(!m_aStarProcess.MoveNext()) {
-                    Debug.Log("寻路结束");
-                }
-            }
-            else {
-                while(m_aStarProcess.MoveNext())
-                    ;
-                ShowPath();
-                
-            }
+            // 先清除上一次生成的路径
+            ClearPath();
+            m_aStarProcess = m_aStar.Start(m_playerLocation, m_destinationLocation);
+            while(m_aStarProcess.MoveNext())
+                ;
+            ShowPath();
         }
 
-        void InstantiateFlag(GameObject flag, Vector3 position)
+        GameObject InstantiateFlag(GameObject flag, Vector3 position)
         {
             var go = UnityEngine.Object.Instantiate(flag, position, Quaternion.identity);
             go.SetActive(true);
-            m_flags.Add(go);
+            return go;
         }
 
-        void InstantiatePathFlag(float x, float y)
+        void InstantiatePathFlag(Vector2 position)
         {
-            InstantiateFlag(m_flag, new Vector3(x, y));
+            var go = InstantiateFlag(m_flag, new Vector3(position.x, position.y));
+            var coordinate = m_mapInfo.WorldPosition2GridCoordinate(position);
+            go.name = $"{coordinate.x}_{coordinate.y}";
         }
 
-        void InstantiateAbstacleFlag(float x, float y)
+        void InstantiateObstacleFlag(Vector2 position)
         {
-            InstantiateFlag(m_abstacleFlag, new Vector3(x, y));
+            InstantiateFlag(m_ObstacleFlag, new Vector3(position.x, position.y));
         }
 
         void ShowPath()
@@ -132,31 +124,34 @@ namespace Framework
             int i = 0;
             foreach(var value in m_mapInfo.m_gridValues)
             {
-                if (value == -1)
-                {
-                    int x = i / m_mapInfo.m_rows;
-                    int y = i % m_mapInfo.m_columns;
-                    float positionX = x * m_mapInfo.m_gridWidth;
-                    float positionY = y * m_mapInfo.m_gridHeight;
-                    InstantiatePathFlag(positionX, positionY);
-                }
+                if (value == MapInfo.Path_Value)
+                    InstantiatePathFlag(m_mapInfo.GridIndex2WorldPosition(i));
                 i++;
             }
         }
 
-        void ShowAbstacles()
+        void ClearPath()
+        {
+            int count = m_mapInfo.m_gridValues.Length;
+            for(int i = 0; i < count; i++)
+            {
+                if (m_mapInfo.m_gridValues[i] == MapInfo.Path_Value)
+                {
+                    m_mapInfo.m_gridValues[i] = 0;
+                    var coordinate = m_mapInfo.GridIndex2Coordinate(i);
+                    var go = GameObject.Find($"{coordinate.x}_{coordinate.y}");
+                    UnityEngine.Object.DestroyImmediate(go);
+                }
+            }
+        }
+
+        void ShowObstacles()
         {
             int i = 0;
             foreach(var value in m_mapInfo.m_gridValues)
             {
-                if (value == 1)
-                {
-                    int x = i / m_mapInfo.m_rows;
-                    int y = i % m_mapInfo.m_columns;
-                    float positionX = x * m_mapInfo.m_gridWidth;
-                    float positionY = y * m_mapInfo.m_gridHeight;
-                    InstantiateAbstacleFlag(positionX, positionY);
-                }
+                if (value == MapInfo.Obstacle_Value)
+                    InstantiateObstacleFlag(m_mapInfo.GridIndex2WorldPosition(i));
                 i++;
             }
         }
@@ -177,12 +172,14 @@ namespace Framework
                         if (m_inSettingPlayerLocation)
                         {
                             m_playerLocation = new Int2(tx, ty);
-                            InstantiatePathFlag(hitInfo.point.x, hitInfo.point.y);
+                            m_mapInfo.SetGridValue(m_playerLocation, MapInfo.Path_Value);
+                            InstantiatePathFlag(new Vector2(hitInfo.point.x, hitInfo.point.y));
                         }
                         else if (m_inSettingDestinationLocation)
                         {
                             m_destinationLocation = new Int2(tx, ty);
-                            InstantiatePathFlag(hitInfo.point.x, hitInfo.point.y);
+                            m_mapInfo.SetGridValue(m_destinationLocation, MapInfo.Path_Value);
+                            InstantiatePathFlag(new Vector2(hitInfo.point.x, hitInfo.point.y));
                         }
                     }
                     m_inSettingPlayerLocation = false;

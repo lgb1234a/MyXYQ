@@ -39,6 +39,7 @@ namespace FrameworkEditor
                         int ty = (int)(hitInfo.point.y / m_mapGrid.GetGridHeight());
                         
                         m_mapGrid.SetGridValue(tx, ty, m_gridValue);
+                        HandleUtility.Repaint();
                     }
                 }
 
@@ -53,6 +54,7 @@ namespace FrameworkEditor
                         int ty = (int)(hitInfo.point.y / m_mapGrid.GetGridHeight());
                         
                         m_mapGrid.SetGridValue(tx, ty, 0);
+                        HandleUtility.Repaint();
                     }
                 }
             }else {
@@ -62,25 +64,42 @@ namespace FrameworkEditor
             }
         }
 
+        public override bool RequiresConstantRepaint()
+        {
+            return true;
+        }
+
         public override void OnInspectorGUI()
         {
             m_editMode = EditorGUILayout.Toggle("EditMode", m_editMode);
             m_gridValue = EditorGUILayout.IntSlider("GridValue", m_gridValue, 1, 2);
             EditorGUILayout.Space(10f);
-            m_exportFileName = EditorGUILayout.TextField("ExportName", m_exportFileName);
-            m_importFileName = EditorGUILayout.TextField("ImportName", m_importFileName);
 
             EditorGUILayout.BeginHorizontal();
-            if (GUILayout.Button("导出"))
+            m_exportFileName = EditorGUILayout.TextField("ExportName", m_exportFileName);
+            if (GUILayout.Button("保存"))
             {
                 OutputFile(m_exportFileName);
             }
-            
+            EditorGUILayout.EndHorizontal();
+
+
+            EditorGUILayout.BeginHorizontal();
+            m_importFileName = EditorGUILayout.TextField("ImportName", m_importFileName);
             if (GUILayout.Button("导入"))
             {
                 InputFile(m_importFileName);
             }
             EditorGUILayout.EndHorizontal();
+            if (GUILayout.Button("清空"))
+            {
+                var count = m_mapGrid.GetGridValues().Length;
+                for (int i = 0; i < count; i++)
+                {
+                    m_mapGrid.GetGridValues()[i] = 0;
+                }
+                UnityEditorInternal.InternalEditorUtility.RepaintAllViews();
+            }
         }
 
 
