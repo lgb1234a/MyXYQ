@@ -37,8 +37,8 @@ namespace FrameworkEditor
                     {
                         int tx = (int)(hitInfo.point.x / m_mapGrid.GetGridWidth());
                         int ty = (int)(hitInfo.point.y / m_mapGrid.GetGridHeight());
-                        
-                        m_mapGrid.SetGridValue(tx, ty, m_gridValue);
+                        var coordinate = new Vector2Int(tx, ty);
+                        m_mapGrid.SetGridValue(coordinate, m_gridValue);
                         HandleUtility.Repaint();
                     }
                 }
@@ -52,8 +52,8 @@ namespace FrameworkEditor
                     {
                         int tx = (int)(hitInfo.point.x / m_mapGrid.GetGridWidth());
                         int ty = (int)(hitInfo.point.y / m_mapGrid.GetGridHeight());
-                        
-                        m_mapGrid.SetGridValue(tx, ty, 0);
+                        var coordinate = new Vector2Int(tx, ty);
+                        m_mapGrid.SetGridValue(coordinate, 0);
                         HandleUtility.Repaint();
                     }
                 }
@@ -62,11 +62,6 @@ namespace FrameworkEditor
                 HandleUtility.Repaint();
                 m_mapGrid.Hide();
             }
-        }
-
-        public override bool RequiresConstantRepaint()
-        {
-            return true;
         }
 
         public override void OnInspectorGUI()

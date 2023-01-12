@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEditor;
 using Framework;
 
@@ -59,14 +60,21 @@ namespace FrameworkEditor
 
                 GameObject mapRenderer = new GameObject(m_mapName);
                 var sr = mapRenderer.AddComponent<SpriteRenderer>();
+                var mapNavigationController = mapRenderer.AddComponent<MapNavigationController>();
+                mapNavigationController.m_setPlayerLocationBtn = GameObject.Find("SetPlayerLocationBtn").GetComponent<Button>();
+                mapNavigationController.m_setDestinationBtn = GameObject.Find("SetDestinationLocationBtn").GetComponent<Button>();
+                mapNavigationController.m_aStarButton = GameObject.Find("AStarBtn").GetComponent<Button>();
+                mapNavigationController.m_pathFlag = GameObject.Find("PathFlag");
+                mapNavigationController.m_obstacleFlag = GameObject.Find("ObstalceFlag");
 
+                // 设置要渲染的地图
                 sr.sprite = Sprite.Create(m_mapTexture, new Rect(0,0,m_mapTexture.width,m_mapTexture.height),Vector2.zero);
                 mapRenderer.transform.SetParent(map.transform);
-
+                // 添加要检测射线的碰撞器
                 var bc = map.AddComponent<BoxCollider>();
                 bc.size = new Vector3(m_mapTexture.width * 0.01f, m_mapTexture.height * 0.01f, 0.2f);
                 bc.center = new Vector3(bc.size.x * 0.5f,  bc.size.y * 0.5f, 0f);
-                
+                // 设置网格参数并初始化
                 m_mapGrid = map.AddComponent<MapGrid>();
                 m_mapGrid.SetGridRows(m_rows);
                 m_mapGrid.SetGridColumns(m_columns);

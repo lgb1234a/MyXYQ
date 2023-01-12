@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEditor;
+using System.IO;
 
 namespace Framework
 {
@@ -14,19 +16,22 @@ namespace Framework
 
         void InitMapData()
         {
-            string path = "Assets/Resources/Text/Map/MWZ.txt";
-            m_mapInfo = MapInfo.ImportFromFile(path);
-            m_gridWidth = m_mapInfo.m_gridWidth;
-            m_gridHeight = m_mapInfo.m_gridHeight;
-            m_gridValues = m_mapInfo.m_gridValues;
-            m_rows = m_mapInfo.m_rows;
-            m_columns = m_mapInfo.m_columns;
+            string path = Environment.GetMapJsonDataPath(transform.GetChild(0).name);
+            if (File.Exists(path))
+            {
+                m_mapInfo = MapInfo.ImportFromFile(path);
+                m_gridWidth = m_mapInfo.m_gridWidth;
+                m_gridHeight = m_mapInfo.m_gridHeight;
+                m_gridValues = m_mapInfo.m_gridValues;
+                m_rows = m_mapInfo.m_rows;
+                m_columns = m_mapInfo.m_columns;
+            }
         }
 
+        // 当编辑器运行或者停止运行都会触发，重新刷新
         void OnValidate()
         {
             InitMapData();
-            RecalculateGridData();
         }
 
         public void Show()
@@ -59,15 +64,15 @@ namespace Framework
             m_gridValues = values;
         }
 
-        public void SetGridValue(int x, int y, int value)
+        public void SetGridValue(Vector2Int coordinate, int value)
         {
-            int index = x*m_rows + y;
+            int index = coordinate.x*m_rows + coordinate.y;
             m_gridValues[index] = value;
         }
 
-        public int GetGridValue(int x, int y)
+        public int GetGridValue(Vector2Int coordinate)
         {
-            int index = x*m_rows + y;
+            int index = coordinate.x*m_rows + coordinate.y;
             return m_gridValues[index];
         }
 
@@ -124,14 +129,15 @@ namespace Framework
             {
                 for (int j = 0; j < m_rows; j ++)
                 {
-                    if (GetGridValue(i, j) == 1)
+                    var coordinate = new Vector2Int(i, j);
+                    if (GetGridValue(coordinate) == MapInfo.Obstacle_Value)
                     {
                         // 不可走，红色
                         Gizmos.color = new Color(1,0,0,0.5f);
                         Gizmos.DrawCube(new Vector3(i * m_gridWidth + m_gridWidth*0.5f, j*m_gridHeight + m_gridHeight*0.5f, 0), new Vector3(m_gridWidth, m_gridHeight, 0.1f));
                     }
 
-                    if (GetGridValue(i, j) == 2)
+                    if (GetGridValue(coordinate) == MapInfo.Occlusion_Value)
                     {
                         // 被遮挡，蓝色
                         Gizmos.color = new Color(0,0,1,0.5f);

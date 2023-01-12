@@ -1,16 +1,13 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEditor;
 
 namespace Framework
 {
     public class MapNavigationController : MonoBehaviour
     {
-        public GameObject m_flag;
-        public GameObject m_ObstacleFlag;
+        public GameObject m_pathFlag;
+        public GameObject m_obstacleFlag;
         public Button m_setPlayerLocationBtn;
         public Button m_setDestinationBtn;
         public Button m_aStarButton;
@@ -32,7 +29,7 @@ namespace Framework
             m_aStarButton.onClick.AddListener(OnClickedAStarBtn);
 
             m_aStar = new AStar();
-            string path = "Assets/Resources/Text/Map/MWZ.txt";
+            string path = Environment.GetCurrentEnvironment().GetMapJsonDataPath(name);
             m_mapInfo = MapInfo.ImportFromFile(path);
 
             var mapSize = new Vector2Int(m_mapInfo.m_rows, m_mapInfo.m_columns);
@@ -69,14 +66,14 @@ namespace Framework
 
         void InstantiatePathFlag(Vector2 position)
         {
-            var go = InstantiateFlag(m_flag, new Vector3(position.x, position.y));
+            var go = InstantiateFlag(m_pathFlag, new Vector3(position.x, position.y));
             var coordinate = m_mapInfo.WorldPosition2GridCoordinate(position);
             go.name = $"{coordinate.x}_{coordinate.y}";
         }
 
         void InstantiateObstacleFlag(Vector2 position)
         {
-            InstantiateFlag(m_ObstacleFlag, new Vector3(position.x, position.y));
+            InstantiateFlag(m_obstacleFlag, new Vector3(position.x, position.y));
         }
 
         void ShowPath()
