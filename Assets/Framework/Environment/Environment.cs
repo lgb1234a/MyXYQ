@@ -25,7 +25,7 @@ namespace Framework
             m_customEnvironment = customEnvironment;
         }
 
-        public static IEnvironmentHandler GetCurrentEnvironment()
+        private static IEnvironmentHandler GetCurrentEnvironment()
         {
             if (m_customEnvironment != null)
             {

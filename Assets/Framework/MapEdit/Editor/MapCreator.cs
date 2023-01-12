@@ -76,9 +76,7 @@ namespace FrameworkEditor
                 bc.center = new Vector3(bc.size.x * 0.5f,  bc.size.y * 0.5f, 0f);
                 // 设置网格参数并初始化
                 m_mapGrid = map.AddComponent<MapGrid>();
-                m_mapGrid.SetGridRows(m_rows);
-                m_mapGrid.SetGridColumns(m_columns);
-                m_mapGrid.RecalculateGridData();
+                m_mapGrid.RecalculateGridData(sr.sprite.bounds.size, m_rows, m_columns);
             }
         }
 

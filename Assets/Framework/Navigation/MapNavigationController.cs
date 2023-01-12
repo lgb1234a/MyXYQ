@@ -28,8 +28,9 @@ namespace Framework
             m_setDestinationBtn.onClick.AddListener(OnClickedDestinationBtn);
             m_aStarButton.onClick.AddListener(OnClickedAStarBtn);
 
+            // 初始化A*
             m_aStar = new AStar();
-            string path = Environment.GetCurrentEnvironment().GetMapJsonDataPath(name);
+            string path = Environment.GetMapJsonDataPath(name);
             m_mapInfo = MapInfo.ImportFromFile(path);
 
             var mapSize = new Vector2Int(m_mapInfo.m_rows, m_mapInfo.m_columns);

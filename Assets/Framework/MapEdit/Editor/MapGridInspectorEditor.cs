@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEditor;
 using Framework;
+using System.IO;
 
 namespace FrameworkEditor
 {
@@ -74,7 +75,13 @@ namespace FrameworkEditor
             m_exportFileName = EditorGUILayout.TextField("ExportName", m_exportFileName);
             if (GUILayout.Button("保存"))
             {
-                OutputFile(m_exportFileName);
+                if (File.Exists(Environment.GetMapJsonDataPath(m_exportFileName)))
+                {
+                    var tip = $"目前已存在名为{m_exportFileName}的文件，是否覆盖？";
+                    var r = EditorUtility.DisplayDialog("Warning", tip, "确定", "不覆盖");
+                    if (r)
+                        ExportFile(m_exportFileName);
+                }
             }
             EditorGUILayout.EndHorizontal();
 
@@ -83,7 +90,10 @@ namespace FrameworkEditor
             m_importFileName = EditorGUILayout.TextField("ImportName", m_importFileName);
             if (GUILayout.Button("导入"))
             {
-                InputFile(m_importFileName);
+                var tip = $"导入会重置掉当前所有改动，是否继续？";
+                var r = EditorUtility.DisplayDialog("Warning", tip, "确定", "不继续");
+                if (r)
+                    ImportFile(m_importFileName);
             }
             EditorGUILayout.EndHorizontal();
             if (GUILayout.Button("清空"))
@@ -98,18 +108,18 @@ namespace FrameworkEditor
         }
 
 
-        void OutputFile(string fileName)
+        void ExportFile(string fileName)
         {
-            MapInfo info = new MapInfo(m_mapGrid.GetGridWidth(), m_mapGrid.GetGridHeight(), m_mapGrid.GetGridValues(), m_mapGrid.GetGridRows(), m_mapGrid.GetGridColumns());
-            string path = Application.dataPath + "/Resources/Text/Map/" + fileName + ".txt";
+            var info = m_mapGrid.GetMapInfo();
+            string path = Environment.GetMapJsonDataPath(fileName);
             info.ExportToFile(path);
         }
 
-        void InputFile(string fileName)
+        void ImportFile(string fileName)
         {
-            string path = "Assets/Resources/Text/Map/" + fileName + ".txt";
+            string path = Environment.GetMapJsonDataPath(fileName);
             var mapInfo = MapInfo.ImportFromFile(path);
-            m_mapGrid.SetGridValues(mapInfo.m_gridValues);
+            m_mapGrid.SetMapInfo(mapInfo);
         }
     }
 }

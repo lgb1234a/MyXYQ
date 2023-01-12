@@ -18,6 +18,8 @@ namespace Framework
         public int m_rows;
         public int m_columns;
 
+        public MapInfo() {}
+
         public MapInfo(float gridWidth, float gridHeight, int[] gridValues, int rows, int columns)
         {
             m_gridWidth = gridWidth;
@@ -30,6 +32,11 @@ namespace Framework
         public void SetGridValue(Vector2Int coordinate, int value)
         {
             m_gridValues[GridCoordinate2Index(coordinate)] = value;
+        }
+
+        public int GetGridValue(Vector2Int coordinate)
+        {
+            return m_gridValues[GridCoordinate2Index(coordinate)];
         }
 
         public Vector2Int GridIndex2Coordinate(int index)
