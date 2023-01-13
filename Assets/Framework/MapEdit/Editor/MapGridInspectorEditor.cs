@@ -96,6 +96,16 @@ namespace FrameworkEditor
                     ImportFile(m_importFileName);
             }
             EditorGUILayout.EndHorizontal();
+            if (GUILayout.Button("自动填充"))
+            {
+                Solve();
+                // var count = m_mapGrid.GetGridValues().Length;
+                // for (int i = 0; i < count; i++)
+                // {
+                //     m_mapGrid.GetGridValues()[i] = 0;
+                // }
+                UnityEditorInternal.InternalEditorUtility.RepaintAllViews();
+            }
             if (GUILayout.Button("清空"))
             {
                 var count = m_mapGrid.GetGridValues().Length;
@@ -120,6 +130,47 @@ namespace FrameworkEditor
             string path = Environment.GetMapJsonDataPath(fileName);
             var mapInfo = MapInfo.ImportFromFile(path);
             m_mapGrid.SetMapInfo(mapInfo);
+        }
+
+        // 任何不在边界上，或者不与边界上的0相邻的0都会被填充为1
+        void Solve() {
+            var board = m_mapGrid.GetMapInfo().m_gridValues;
+            var rows = m_mapGrid.GetMapInfo().m_rows;
+            var columns = m_mapGrid.GetMapInfo().m_columns;
+            for (int i = 0; i < rows; i++) {
+                Dfs(board, i, 0);
+                Dfs(board, i, columns - 1);
+            }
+
+            for(int j = 0; j < columns; j++) {
+                Dfs(board, 0, j);
+                Dfs(board, rows-1, j);
+            }
+
+            for(int i = 0; i < rows; i++) {
+                for (int j = 0; j < columns; j++) {
+                    var index = m_mapGrid.GetMapInfo().GridCoordinate2Index(new Vector2Int(i, j));
+                    if (board[index] == 0)
+                        board[index] = 1;
+                    if(board[index] == -9999)
+                        board[index] = 0;
+                }
+            }
+        }
+
+        void Dfs(int[] board, int i, int j)
+        {
+            var index = m_mapGrid.GetMapInfo().GridCoordinate2Index(new Vector2Int(i, j));
+            var rows = m_mapGrid.GetMapInfo().m_rows;
+            var columns = m_mapGrid.GetMapInfo().m_columns;
+            if(i<0||j<0||i>=rows||j>=columns|| board[index] != 0)
+                return;
+            board[index] = -9999;
+            Dfs(board,i-1,j);
+            Dfs(board,i+1,j);
+            Dfs(board,i,j-1);
+            Dfs(board,i,j+1);
+            return ;
         }
     }
 }
