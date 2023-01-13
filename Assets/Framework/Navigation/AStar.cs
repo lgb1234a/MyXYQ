@@ -51,7 +51,10 @@ namespace Framework
         static int FACTOR = 10;
         static int FACTOR_DIAGONAL = 14;
 
+        // 展示的数据
         int[] m_map;
+        // 初始数据
+        int[] m_originMap;
         Vector2Int m_mapSize;
         Vector2Int m_player, m_destination;
         EvaluationFunctionType m_evaluationFunctionType;
@@ -63,14 +66,14 @@ namespace Framework
 
         public void Init(int[] map, Vector2Int mapSize, EvaluationFunctionType type = EvaluationFunctionType.Diagonal) {
             m_map = map;
+            m_originMap = map.Clone() as int[];
             m_mapSize = mapSize;
             m_evaluationFunctionType = type;
         }
 
         public IEnumerator Start(Vector2Int player, Vector2Int destination) {
             Clear();
-            m_player = player;
-            m_destination = destination;
+            HandleDestination(player, destination);
             AddNodeInOpenQueue(new Node(m_player, null, 0, 0));
 
             while(m_openDic.Count > 0 && m_destinationNode == null) {
@@ -87,6 +90,66 @@ namespace Framework
                 ShowPath(m_destinationNode);
         }
 
+        // 如果目标点是障碍物，则取玩家点到目标点连线上离目标点最近的可通过点
+        void HandleDestination(Vector2Int player, Vector2Int destination)
+        {
+            if(GetGridValue(destination) == MapInfo.Obstacle_Value)
+            {
+                // 反向寻路找到离目标点最近的可达点坐标
+                m_player = destination;
+                m_destination = player;
+                AddNodeInOpenQueue(new Node(destination, null, 0, 0));
+
+                while(m_openDic.Count > 0 && m_destinationNode == null) {
+                    m_openDic = m_openDic.OrderBy(kv => kv.Value.f).ToDictionary(p => p.Key, o => o.Value);
+                    Node node = m_openDic.First().Value;
+                    m_openDic.Remove(node.position);
+                    if (OperateObstaclbeNeighborNode(node))
+                        break;
+                    AddNodeInCloseDic(node);
+                }
+                if(m_destinationNode == null)
+                    Debug.LogError("找不到可用目标点");
+                else
+                {
+                    m_destination = m_destinationNode.position;
+                    m_player = player;
+                }
+
+                Clear();
+            }else
+            {
+                m_player = player;
+                m_destination = destination;
+            }
+        }
+
+        //处理目标点在障碍区域相邻的节点
+        bool OperateObstaclbeNeighborNode(Node node)
+        {
+            for(int i = -1; i < 2; i++) {
+                for(int j = -1; j < 2; j++) {
+                    if(i == 0 && j == 0)
+                        continue;
+                    Vector2Int pos = new Vector2Int(node.position.x + i, node.position.y + j);
+                    //超出地图范围
+                    if(pos.x < 0 || pos.x >= m_mapSize.x || pos.y < 0 || pos.y >= m_mapSize.y)
+                        continue;
+                    //已经处理过的节点
+                    if(m_closeDic.ContainsKey(pos))
+                        continue;
+                    //将相邻节点加入open中
+                    if(i == 0 || j == 0)
+                        if (AddObstacleNeighborNodeInQueue(node, pos, FACTOR))
+                            return true;
+                    else
+                        if (AddObstacleNeighborNodeInQueue(node, pos, FACTOR_DIAGONAL))
+                            return true;
+                }
+            }
+            return false;
+        }
+
         //处理相邻的节点
         void OperateNeighborNode(Node node) {
             for(int i = -1; i < 2; i++) {
@@ -101,7 +164,7 @@ namespace Framework
                     if(m_closeDic.ContainsKey(pos))
                         continue;
                     //障碍物节点
-                    if(m_map[pos.GetMapGridIndex(m_mapSize.x)] == MapInfo.Obstacle_Value)
+                    if(GetGridValue(pos) == MapInfo.Obstacle_Value)
                         continue;
                     //将相邻节点加入open中
                     if(i == 0 || j == 0)
@@ -110,6 +173,28 @@ namespace Framework
                         AddNeighborNodeInQueue(node, pos, FACTOR_DIAGONAL);
                 }
             }
+        }
+
+        bool AddObstacleNeighborNodeInQueue(Node parentNode, Vector2Int position, int g)
+        {
+            int nodeG = parentNode.g + g;
+            if(m_openDic.ContainsKey(position)) {
+                if(nodeG < m_openDic[position].g) {
+                    m_openDic[position].g = nodeG;
+                    m_openDic[position].parent = parentNode;
+                }
+            }
+            else {
+                Node node = new Node(position, parentNode, nodeG, GetH(position));
+                if(GetGridValue(position) == 0)
+                {
+                    m_destinationNode = node;
+                    return true;
+                }
+                else
+                    AddNodeInOpenQueue(node);
+            }
+            return false;
         }
 
         void AddNeighborNodeInQueue(Node parentNode, Vector2Int position, int g) {
@@ -140,7 +225,7 @@ namespace Framework
 
         void ShowPath(Node node) {
             while(node != null) {
-                m_map[node.position.GetMapGridIndex(m_mapSize.x)] = MapInfo.Path_Value;
+                SetGridValue(node.position, MapInfo.Path_Value);
                 node = node.parent;
             }
         }
@@ -170,17 +255,22 @@ namespace Framework
         }
 
         public void Clear() {
-            foreach(var pos in m_openDic.Keys) {
-                m_map[pos.GetMapGridIndex(m_mapSize.x)] = 0;
-            }
+            for (int i = 0; i < m_originMap.Length; i++)
+                m_map[i] = m_originMap[i];
             m_openDic.Clear();
-
-            foreach(var pos in m_closeDic.Keys) {
-                m_map[pos.GetMapGridIndex(m_mapSize.x)] = 0;
-            }
             m_closeDic.Clear();
 
             m_destinationNode = null;
+        }
+
+        public int GetGridValue(Vector2Int coordinate)
+        {
+            return m_map[coordinate.GetMapGridIndex(m_mapSize.x)];
+        }
+
+        public void SetGridValue(Vector2Int coordinate, int v)
+        {
+            m_map[coordinate.GetMapGridIndex(m_mapSize.x)] = v;
         }
     }
 }

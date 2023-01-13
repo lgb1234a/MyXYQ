@@ -99,11 +99,6 @@ namespace FrameworkEditor
             if (GUILayout.Button("自动填充"))
             {
                 Solve();
-                // var count = m_mapGrid.GetGridValues().Length;
-                // for (int i = 0; i < count; i++)
-                // {
-                //     m_mapGrid.GetGridValues()[i] = 0;
-                // }
                 UnityEditorInternal.InternalEditorUtility.RepaintAllViews();
             }
             if (GUILayout.Button("清空"))
@@ -151,11 +146,25 @@ namespace FrameworkEditor
                 for (int j = 0; j < columns; j++) {
                     var index = m_mapGrid.GetMapInfo().GridCoordinate2Index(new Vector2Int(i, j));
                     if (board[index] == 0)
-                        board[index] = 1;
+                        board[index] = DFS2FindValue(board, i, j);
                     if(board[index] == -9999)
                         board[index] = 0;
                 }
             }
+        }
+
+        // 为了让封闭区域内填充的值和边界一致，需要递归获取封闭区域边界的值
+        int DFS2FindValue(int[] board, int i, int j)
+        {
+            var index = m_mapGrid.GetMapInfo().GridCoordinate2Index(new Vector2Int(i, j));
+            var rows = m_mapGrid.GetMapInfo().m_rows;
+            var columns = m_mapGrid.GetMapInfo().m_columns;
+            if (board[index] != 0)
+            {
+                return board[index];
+            }
+
+            return DFS2FindValue(board,i-1,j);
         }
 
         void Dfs(int[] board, int i, int j)

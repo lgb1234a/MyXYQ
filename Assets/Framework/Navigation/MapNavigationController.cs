@@ -136,7 +136,8 @@ namespace Framework
                         else if (m_inSettingDestinationLocation)
                         {
                             m_destinationLocation = new Vector2Int(tx, ty);
-                            m_mapInfo.SetGridValue(m_destinationLocation, MapInfo.Path_Value);
+                            if (m_mapInfo.GetGridValue(m_destinationLocation) != MapInfo.Obstacle_Value)
+                                m_mapInfo.SetGridValue(m_destinationLocation, MapInfo.Path_Value);
                             InstantiatePathFlag(new Vector2(hitInfo.point.x, hitInfo.point.y));
                         }
                     }
