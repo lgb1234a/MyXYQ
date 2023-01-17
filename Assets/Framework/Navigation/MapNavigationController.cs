@@ -34,8 +34,10 @@ namespace Framework
             m_mapInfo = MapInfo.ImportFromFile(path);
 
             var mapSize = new Vector2Int(m_mapInfo.m_rows, m_mapInfo.m_columns);
-            m_aStar.Init(m_mapInfo.m_gridValues, mapSize, m_evaluationFunctionType);
+            m_aStar.Init(m_mapInfo, mapSize, m_evaluationFunctionType);
+#if UNITY_EDITOR
             ShowObstacles();
+#endif
         }
 
         void OnClickedPlayerLocationBtn()
@@ -55,7 +57,14 @@ namespace Framework
             m_aStarProcess = m_aStar.Start(m_playerLocation, m_destinationLocation);
             while(m_aStarProcess.MoveNext())
                 ;
+#if UNITY_EDITOR
             ShowPath();
+#endif
+        }
+
+        string GetFlagName(Vector2Int coordinate)
+        {
+            return $"{coordinate.x}_{coordinate.y}";
         }
 
         GameObject InstantiateFlag(GameObject flag, Vector3 position)
@@ -69,7 +78,7 @@ namespace Framework
         {
             var go = InstantiateFlag(m_pathFlag, new Vector3(position.x, position.y));
             var coordinate = m_mapInfo.WorldPosition2GridCoordinate(position);
-            go.name = $"{coordinate.x}_{coordinate.y}";
+            go.name = GetFlagName(coordinate);
         }
 
         void InstantiateObstacleFlag(Vector2 position)
@@ -88,19 +97,26 @@ namespace Framework
             }
         }
 
+        void DestroyGameObjectByName(string name)
+        {
+            var go = GameObject.Find(name);
+            UnityEngine.Object.DestroyImmediate(go);
+        }
+
         void ClearPath()
         {
             int count = m_mapInfo.m_gridValues.Length;
             for(int i = 0; i < count; i++)
             {
-                if (m_mapInfo.m_gridValues[i] == MapInfo.Path_Value)
+                if (m_mapInfo.IsIndexPath(i))
                 {
                     m_mapInfo.m_gridValues[i] = 0;
                     var coordinate = m_mapInfo.GridIndex2Coordinate(i);
-                    var go = GameObject.Find($"{coordinate.x}_{coordinate.y}");
-                    UnityEngine.Object.DestroyImmediate(go);
+                    DestroyGameObjectByName(GetFlagName(coordinate));
                 }
             }
+            // 因为当目标点在不可走区域时不能被标记为路径点，所以需要单独销毁目标点的标记object
+            DestroyGameObjectByName(GetFlagName(m_destinationLocation));
         }
 
         void ShowObstacles()

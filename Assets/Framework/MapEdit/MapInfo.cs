@@ -6,6 +6,7 @@ namespace Framework
     [Serializable]
     public class MapInfo : TextAssetRWAblity<MapInfo>
     {
+        public static int Default_Value = 0;
         // 路径
         public static int Path_Value = -1;
         // 障碍物
@@ -60,11 +61,46 @@ namespace Framework
             return new Vector2(positionX, positionY);
         }
 
-        public Vector2 WorldPosition2GridCoordinate(Vector2 position)
+        public Vector2Int WorldPosition2GridCoordinate(Vector2 position)
         {
             int tx = (int)(position.x / m_gridWidth);
             int ty = (int)(position.y / m_gridHeight);
-            return new Vector2(tx, ty);
+            return new Vector2Int(tx, ty);
+        }
+
+        public bool IsCoordinatePath(Vector2Int coordinate)
+        {
+            return GetGridValue(coordinate) == Path_Value;
+        }
+
+        public bool IsCoordinateObstacle(Vector2Int coordinate)
+        {
+            return GetGridValue(coordinate) == Obstacle_Value;
+        }
+
+        public bool IsCoordinateOcclusion(Vector2Int coordinate)
+        {
+            return GetGridValue(coordinate) == Occlusion_Value;
+        }
+
+        public bool IsCoordinateDefaultValue(Vector2Int coordinate)
+        {
+            return GetGridValue(coordinate) == Default_Value; 
+        }
+
+        public bool IsIndexPath(int index)
+        {
+            return m_gridValues[index] == Path_Value;
+        }
+
+        public bool IsIndexObstacle(int index)
+        {
+            return m_gridValues[index] == Obstacle_Value;
+        }
+
+        public bool IsIndexOcclusion(int index)
+        {
+            return m_gridValues[index] == Occlusion_Value;
         }
     }
 }

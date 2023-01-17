@@ -39,7 +39,8 @@ namespace FrameworkEditor
                         int tx = (int)(hitInfo.point.x / m_mapGrid.GetGridWidth());
                         int ty = (int)(hitInfo.point.y / m_mapGrid.GetGridHeight());
                         var coordinate = new Vector2Int(tx, ty);
-                        m_mapGrid.SetGridValue(coordinate, m_gridValue);
+                        if (m_mapGrid.GetMapInfo().IsCoordinateDefaultValue(coordinate)) 
+                            m_mapGrid.SetGridValue(coordinate, m_gridValue);
                         HandleUtility.Repaint();
                     }
                 }

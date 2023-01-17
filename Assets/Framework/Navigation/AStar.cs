@@ -52,7 +52,7 @@ namespace Framework
         static int FACTOR_DIAGONAL = 14;
 
         // 展示的数据
-        int[] m_map;
+        MapInfo m_map;
         // 初始数据
         int[] m_originMap;
         Vector2Int m_mapSize;
@@ -64,9 +64,9 @@ namespace Framework
 
         Node m_destinationNode;
 
-        public void Init(int[] map, Vector2Int mapSize, EvaluationFunctionType type = EvaluationFunctionType.Diagonal) {
+        public void Init(MapInfo map, Vector2Int mapSize, EvaluationFunctionType type = EvaluationFunctionType.Diagonal) {
             m_map = map;
-            m_originMap = map.Clone() as int[];
+            m_originMap = map.m_gridValues.Clone() as int[];
             m_mapSize = mapSize;
             m_evaluationFunctionType = type;
         }
@@ -93,7 +93,7 @@ namespace Framework
         // 如果目标点是障碍物，则取玩家点到目标点连线上离目标点最近的可通过点
         void HandleDestination(Vector2Int player, Vector2Int destination)
         {
-            if(GetGridValue(destination) == MapInfo.Obstacle_Value)
+            if(m_map.IsCoordinateObstacle(destination))
             {
                 // 反向寻路找到离目标点最近的可达点坐标
                 m_player = destination;
@@ -164,7 +164,7 @@ namespace Framework
                     if(m_closeDic.ContainsKey(pos))
                         continue;
                     //障碍物节点
-                    if(GetGridValue(pos) == MapInfo.Obstacle_Value)
+                    if(m_map.IsCoordinateObstacle(pos))
                         continue;
                     //将相邻节点加入open中
                     if(i == 0 || j == 0)
@@ -186,7 +186,7 @@ namespace Framework
             }
             else {
                 Node node = new Node(position, parentNode, nodeG, GetH(position));
-                if(GetGridValue(position) == 0)
+                if(m_map.IsCoordinateDefaultValue(position))
                 {
                     m_destinationNode = node;
                     return true;
@@ -225,7 +225,7 @@ namespace Framework
 
         void ShowPath(Node node) {
             while(node != null) {
-                SetGridValue(node.position, MapInfo.Path_Value);
+                m_map.SetGridValue(node.position, MapInfo.Path_Value);
                 node = node.parent;
             }
         }
@@ -256,21 +256,11 @@ namespace Framework
 
         public void Clear() {
             for (int i = 0; i < m_originMap.Length; i++)
-                m_map[i] = m_originMap[i];
+                m_map.SetGridValue(m_map.GridIndex2Coordinate(i), m_originMap[i]);
             m_openDic.Clear();
             m_closeDic.Clear();
 
             m_destinationNode = null;
-        }
-
-        public int GetGridValue(Vector2Int coordinate)
-        {
-            return m_map[coordinate.GetMapGridIndex(m_mapSize.x)];
-        }
-
-        public void SetGridValue(Vector2Int coordinate, int v)
-        {
-            m_map[coordinate.GetMapGridIndex(m_mapSize.x)] = v;
         }
     }
 }

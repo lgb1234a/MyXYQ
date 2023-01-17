@@ -133,14 +133,14 @@ namespace Framework
                     var coordinate = new Vector2Int(i, j);
                     var gridWidth = m_mapInfo.m_gridWidth;
                     var gridHeight = m_mapInfo.m_gridHeight;
-                    if (GetGridValue(coordinate) == MapInfo.Obstacle_Value)
+                    if (m_mapInfo.IsCoordinateObstacle(coordinate))
                     {
                         // 不可走，红色
                         Gizmos.color = new Color(1,0,0,0.5f);
                         Gizmos.DrawCube(new Vector3(i * gridWidth + gridWidth*0.5f, j*gridHeight + gridHeight*0.5f, 0), new Vector3(gridWidth, gridHeight, 0.1f));
                     }
 
-                    if (GetGridValue(coordinate) == MapInfo.Occlusion_Value)
+                    if (m_mapInfo.IsCoordinateOcclusion(coordinate))
                     {
                         // 被遮挡，蓝色
                         Gizmos.color = new Color(0,0,1,0.5f);
