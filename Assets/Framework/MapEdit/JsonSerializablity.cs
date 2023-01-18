@@ -2,16 +2,13 @@ using UnityEngine;
 
 namespace Framework
 {
-    public class JsonSerializablity<T>
-    {
-        public string Serialize()
-        {
-            string jsonString = JsonUtility.ToJson(this);
+    public class JsonSerializablity {
+        public static string Serialize(object obj) {
+            string jsonString = JsonUtility.ToJson(obj);
             return jsonString;
         }
 
-        public static T Deserialize(string content)
-        {
+        public static T Deserialize<T>(string content) {
             var t = JsonUtility.FromJson<T>(content);
             return t;
         }

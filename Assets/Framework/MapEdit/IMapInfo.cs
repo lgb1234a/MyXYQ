@@ -1,10 +1,7 @@
-using System;
 using UnityEngine;
 
-namespace Framework
-{
-    public interface IMapInfo
-    {
+namespace Framework {
+    public interface IMapInfo {
         public bool IsCoordinateObstacle(Vector2Int coordinate);
 
         public bool IsCoordinateOcclusion(Vector2Int coordinate);

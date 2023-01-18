@@ -5,8 +5,7 @@ using Framework;
 
 namespace FrameworkEditor
 {
-    public class MapCreator : EditorWindow
-    {
+    public class MapCreator : EditorWindow {
         private MapGrid m_mapGrid;
         private UnityEngine.Object m_targetMap;
         private Texture2D m_mapTexture;
@@ -17,18 +16,15 @@ namespace FrameworkEditor
 
 
         [MenuItem("Tools/MapEditor")]
-        static void Create()
-        {
+        static void Create() {
             var window = EditorWindow.GetWindow<MapCreator>();
             window.titleContent = new GUIContent("地图编辑器");
         }
 
-        void OnGUI()
-        {
+        void OnGUI() {
             m_targetMap = EditorGUILayout.ObjectField("地图贴图", m_targetMap, typeof(UnityEngine.Texture2D), false, null);
 
-            if (m_targetMap)
-            {
+            if (m_targetMap) {
                 var mapPath = AssetDatabase.GetAssetPath(m_targetMap);
                 m_mapTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(mapPath);
                 
@@ -39,22 +35,19 @@ namespace FrameworkEditor
                 EditorGUILayout.BeginHorizontal();
                 m_rows = int.Parse(EditorGUILayout.TextField("行数", m_rows.ToString()));
                 m_columns = int.Parse(EditorGUILayout.TextField("列数", m_columns.ToString()));
-                if (GUILayout.Button("创建"))
-                {
+                if (GUILayout.Button("创建")) {
                     m_mapName = m_targetMap.name;
                     GenerateMap();
                 }
                 EditorGUILayout.EndHorizontal();
             }
 
-            if (GUILayout.Button("清理"))
-            {
-                ClearMapGameObject();
+            if (GUILayout.Button("清理")) {
+                DeleteMapGameObject();
             }
         }
 
-        void GenerateMap()
-        {
+        void GenerateMap() {
             if (m_targetMap != null) {
                 var map = new GameObject("Map");
 
@@ -72,19 +65,17 @@ namespace FrameworkEditor
                 mapRenderer.transform.SetParent(map.transform);
                 // 添加要检测射线的碰撞器
                 var bc = map.AddComponent<BoxCollider>();
-                bc.size = new Vector3(m_mapTexture.width * 0.01f, m_mapTexture.height * 0.01f, 0.2f);
-                bc.center = new Vector3(bc.size.x * 0.5f,  bc.size.y * 0.5f, 0f);
+                bc.size = new Vector3(m_mapTexture.width*0.01f, m_mapTexture.height*0.01f, 0.2f);
+                bc.center = new Vector3(bc.size.x*0.5f,  bc.size.y*0.5f, 0f);
                 // 设置网格参数并初始化
                 m_mapGrid = map.AddComponent<MapGrid>();
                 m_mapGrid.RecalculateGridData(sr.sprite.bounds.size, m_rows, m_columns);
             }
         }
 
-        void ClearMapGameObject()
-        {
+        void DeleteMapGameObject() {
             GameObject map = GameObject.Find("Map");
-            if (map != null)
-            {
+            if (map != null) {
                 GameObject.DestroyImmediate(map);
             }
         }
