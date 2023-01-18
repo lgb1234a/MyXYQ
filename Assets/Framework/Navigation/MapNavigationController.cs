@@ -14,7 +14,7 @@ namespace Framework
         public EvaluationFunctionType m_evaluationFunctionType = EvaluationFunctionType.Manhattan;
 
         AStar m_aStar;
-        MapInfo m_mapInfo;
+        IMapInfo m_mapInfo;
         IEnumerator m_aStarProcess;
 
         bool m_inSettingPlayerLocation;
@@ -33,7 +33,7 @@ namespace Framework
             string path = Environment.GetMapJsonDataPath(name);
             m_mapInfo = MapInfo.ImportFromFile(path);
 
-            var mapSize = new Vector2Int(m_mapInfo.m_rows, m_mapInfo.m_columns);
+            var mapSize = new Vector2Int(m_mapInfo.GetGridRows(), m_mapInfo.GetGridColumns());
             m_aStar.Init(m_mapInfo, mapSize, m_evaluationFunctionType);
 #if UNITY_EDITOR
             ShowObstacles();
@@ -89,7 +89,7 @@ namespace Framework
         void ShowPath()
         {
             int i = 0;
-            foreach(var value in m_mapInfo.m_gridValues)
+            foreach(var value in m_mapInfo.GetGridValues())
             {
                 if (value == MapInfo.Path_Value)
                     InstantiatePathFlag(m_mapInfo.GridIndex2WorldPosition(i));
@@ -105,12 +105,12 @@ namespace Framework
 
         void ClearPath()
         {
-            int count = m_mapInfo.m_gridValues.Length;
+            int count = m_mapInfo.GetGridValues().Length;
             for(int i = 0; i < count; i++)
             {
                 if (m_mapInfo.IsIndexPath(i))
                 {
-                    m_mapInfo.m_gridValues[i] = 0;
+                    m_mapInfo.GetGridValues()[i] = 0;
                     var coordinate = m_mapInfo.GridIndex2Coordinate(i);
                     DestroyGameObjectByName(GetFlagName(coordinate));
                 }
@@ -122,7 +122,7 @@ namespace Framework
         void ShowObstacles()
         {
             int i = 0;
-            foreach(var value in m_mapInfo.m_gridValues)
+            foreach(var value in m_mapInfo.GetGridValues())
             {
                 if (value == MapInfo.Obstacle_Value)
                     InstantiateObstacleFlag(m_mapInfo.GridIndex2WorldPosition(i));
@@ -140,8 +140,8 @@ namespace Framework
                     RaycastHit hitInfo;
                     if (Physics.Raycast(ray, out hitInfo, 200f))
                     {
-                        int tx = (int)(hitInfo.point.x / m_mapInfo.m_gridWidth);
-                        int ty = (int)(hitInfo.point.y / m_mapInfo.m_gridHeight);
+                        int tx = (int)(hitInfo.point.x / m_mapInfo.GetGridWidth());
+                        int ty = (int)(hitInfo.point.y / m_mapInfo.GetGridHeight());
                         
                         if (m_inSettingPlayerLocation)
                         {

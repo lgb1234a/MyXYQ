@@ -7,7 +7,7 @@ namespace Framework
     public class MapGrid : MonoBehaviour
     {
         private bool m_isShow = true;
-        private MapInfo m_mapInfo;
+        private IMapInfo m_mapInfo;
 
         void InitMapData()
         {
@@ -37,73 +37,23 @@ namespace Framework
             m_isShow = false;
         }
 
-        public float GetGridWidth()
-        {
-            return m_mapInfo.m_gridWidth;
-        }
-
-        public float GetGridHeight()
-        {
-            return m_mapInfo.m_gridHeight;
-        }
-
-        public int[] GetGridValues()
-        {
-            return m_mapInfo.m_gridValues;
-        }
-
-        public void SetGridValues(int[] values)
-        {
-            m_mapInfo.m_gridValues = values;
-        }
-
-        public void SetGridValue(Vector2Int coordinate, int value)
-        {
-            m_mapInfo.SetGridValue(coordinate, value);
-        }
-
-        public int GetGridValue(Vector2Int coordinate)
-        {
-            return m_mapInfo.GetGridValue(coordinate);
-        }
-
-        public int GetGridRows()
-        {
-            return m_mapInfo.m_rows;
-        }
-
-        public void SetGridRows(int rows)
-        {
-            m_mapInfo.m_rows = rows;
-        }
-
-        public int GetGridColumns()
-        {
-            return m_mapInfo.m_columns;
-        }
-
-        public void SetGridColumns(int columns)
-        {
-            m_mapInfo.m_columns = columns;
-        }
-
-        public MapInfo GetMapInfo()
+        public IMapInfo GetMapInfo()
         {
             return m_mapInfo;
         }
 
-        public void SetMapInfo(MapInfo mapInfo)
+        public void SetMapInfo(IMapInfo mapInfo)
         {
             m_mapInfo = mapInfo;
         }
 
         public void RecalculateGridData(Vector3 mapSize, int rows, int columns)
         {
-            SetGridRows(rows);
-            SetGridColumns(columns);
-            m_mapInfo.m_gridWidth = mapSize.x / columns;
-            m_mapInfo.m_gridHeight = mapSize.y / rows;
-            m_mapInfo.m_gridValues = new int[rows * columns];
+            m_mapInfo.SetGridRows(rows);
+            m_mapInfo.SetGridColumns(columns);
+            m_mapInfo.SetGridWidth(mapSize.x / columns);
+            m_mapInfo.SetGridHeight(mapSize.y / rows);
+            m_mapInfo.SetGridValues(new int[rows * columns]);
         }
 
         void OnDrawGizmos()
@@ -115,24 +65,24 @@ namespace Framework
             Gizmos.color = Color.white;
             var mapSprite = transform.GetChild(0);
             var sr = mapSprite.GetComponent<SpriteRenderer>();
-            for (int i = 0; i < m_mapInfo.m_columns; i++) {
-                float x = Mathf.Min(m_mapInfo.m_gridWidth * i, sr.sprite.bounds.size.x);
+            for (int i = 0; i < m_mapInfo.GetGridColumns(); i++) {
+                float x = Mathf.Min(m_mapInfo.GetGridWidth() * i, sr.sprite.bounds.size.x);
                 Gizmos.DrawLine(new Vector2(x,0), new Vector2(x, sr.sprite.bounds.size.y));
             }
 
-            for (int i = 0; i < m_mapInfo.m_rows; i++) {
-                float y = Mathf.Min(m_mapInfo.m_gridHeight * i, sr.sprite.bounds.size.y);
+            for (int i = 0; i < m_mapInfo.GetGridRows(); i++) {
+                float y = Mathf.Min(m_mapInfo.GetGridHeight() * i, sr.sprite.bounds.size.y);
                 Gizmos.DrawLine(new Vector2(0, y), new Vector2(sr.sprite.bounds.size.x, y));
             }
 
             // 画正方体
-            for (int i = 0; i < m_mapInfo.m_columns; i++)
+            for (int i = 0; i < m_mapInfo.GetGridColumns(); i++)
             {
-                for (int j = 0; j < m_mapInfo.m_rows; j ++)
+                for (int j = 0; j < m_mapInfo.GetGridRows(); j ++)
                 {
                     var coordinate = new Vector2Int(i, j);
-                    var gridWidth = m_mapInfo.m_gridWidth;
-                    var gridHeight = m_mapInfo.m_gridHeight;
+                    var gridWidth = m_mapInfo.GetGridWidth();
+                    var gridHeight = m_mapInfo.GetGridHeight();
                     if (m_mapInfo.IsCoordinateObstacle(coordinate))
                     {
                         // 不可走，红色

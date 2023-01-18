@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Framework
 {
     [Serializable]
-    public class MapInfo : TextAssetRWAblity<MapInfo>
+    public class MapInfo : TextAssetRWAblity<MapInfo>, IMapInfo
     {
         public static int Default_Value = 0;
         // 路径
@@ -28,6 +28,56 @@ namespace Framework
             m_gridValues = gridValues;
             m_rows = rows;
             m_columns = columns;
+        }
+
+        public int[] GetGridValues()
+        {
+            return m_gridValues;
+        }
+
+        public void SetGridValues(int[] v)
+        {
+            m_gridValues = v;
+        }
+
+        public float GetGridWidth()
+        {
+            return m_gridWidth;
+        }
+
+        public void SetGridWidth(float v)
+        {
+            m_gridWidth = v;
+        }
+
+        public float GetGridHeight()
+        {
+            return m_gridHeight;
+        }
+
+        public void SetGridHeight(float v)
+        {
+            m_gridHeight = v;
+        }
+
+        public int GetGridRows()
+        {
+            return m_rows;
+        }
+
+        public void SetGridRows(int v)
+        {
+            m_rows = v;
+        }
+
+        public int GetGridColumns()
+        {
+            return m_columns;
+        }
+
+        public void SetGridColumns(int v)
+        {
+            m_columns = v;
         }
 
         public void SetGridValue(Vector2Int coordinate, int value)

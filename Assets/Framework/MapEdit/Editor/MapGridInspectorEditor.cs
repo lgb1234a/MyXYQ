@@ -36,11 +36,11 @@ namespace FrameworkEditor
                     RaycastHit hitInfo;
                     if (Physics.Raycast(ray, out hitInfo, 200f))
                     {
-                        int tx = (int)(hitInfo.point.x / m_mapGrid.GetGridWidth());
-                        int ty = (int)(hitInfo.point.y / m_mapGrid.GetGridHeight());
+                        int tx = (int)(hitInfo.point.x / m_mapGrid.GetMapInfo().GetGridWidth());
+                        int ty = (int)(hitInfo.point.y / m_mapGrid.GetMapInfo().GetGridHeight());
                         var coordinate = new Vector2Int(tx, ty);
                         if (m_mapGrid.GetMapInfo().IsCoordinateDefaultValue(coordinate)) 
-                            m_mapGrid.SetGridValue(coordinate, m_gridValue);
+                            m_mapGrid.GetMapInfo().SetGridValue(coordinate, m_gridValue);
                         HandleUtility.Repaint();
                     }
                 }
@@ -52,10 +52,10 @@ namespace FrameworkEditor
                     RaycastHit hitInfo;
                     if (Physics.Raycast(ray, out hitInfo, 200f))
                     {
-                        int tx = (int)(hitInfo.point.x / m_mapGrid.GetGridWidth());
-                        int ty = (int)(hitInfo.point.y / m_mapGrid.GetGridHeight());
+                        int tx = (int)(hitInfo.point.x / m_mapGrid.GetMapInfo().GetGridWidth());
+                        int ty = (int)(hitInfo.point.y / m_mapGrid.GetMapInfo().GetGridHeight());
                         var coordinate = new Vector2Int(tx, ty);
-                        m_mapGrid.SetGridValue(coordinate, 0);
+                        m_mapGrid.GetMapInfo().SetGridValue(coordinate, 0);
                         HandleUtility.Repaint();
                     }
                 }
@@ -104,10 +104,10 @@ namespace FrameworkEditor
             }
             if (GUILayout.Button("清空"))
             {
-                var count = m_mapGrid.GetGridValues().Length;
+                var count = m_mapGrid.GetMapInfo().GetGridValues().Length;
                 for (int i = 0; i < count; i++)
                 {
-                    m_mapGrid.GetGridValues()[i] = 0;
+                    m_mapGrid.GetMapInfo().GetGridValues()[i] = 0;
                 }
                 UnityEditorInternal.InternalEditorUtility.RepaintAllViews();
             }
@@ -116,7 +116,7 @@ namespace FrameworkEditor
 
         void ExportFile(string fileName)
         {
-            var info = m_mapGrid.GetMapInfo();
+            var info = m_mapGrid.GetMapInfo() as MapInfo;
             string path = Environment.GetMapJsonDataPath(fileName);
             info.ExportToFile(path);
         }
@@ -130,9 +130,9 @@ namespace FrameworkEditor
 
         // 任何不在边界上，或者不与边界上的0相邻的0都会被填充为1
         void Solve() {
-            var board = m_mapGrid.GetMapInfo().m_gridValues;
-            var rows = m_mapGrid.GetMapInfo().m_rows;
-            var columns = m_mapGrid.GetMapInfo().m_columns;
+            var board = m_mapGrid.GetMapInfo().GetGridValues();
+            var rows = m_mapGrid.GetMapInfo().GetGridRows();
+            var columns = m_mapGrid.GetMapInfo().GetGridColumns();
             for (int i = 0; i < rows; i++) {
                 Dfs(board, i, 0);
                 Dfs(board, i, columns - 1);
@@ -158,8 +158,8 @@ namespace FrameworkEditor
         int DFS2FindValue(int[] board, int i, int j)
         {
             var index = m_mapGrid.GetMapInfo().GridCoordinate2Index(new Vector2Int(i, j));
-            var rows = m_mapGrid.GetMapInfo().m_rows;
-            var columns = m_mapGrid.GetMapInfo().m_columns;
+            var rows = m_mapGrid.GetMapInfo().GetGridRows();
+            var columns = m_mapGrid.GetMapInfo().GetGridColumns();
             if (board[index] != 0)
             {
                 return board[index];
@@ -171,8 +171,8 @@ namespace FrameworkEditor
         void Dfs(int[] board, int i, int j)
         {
             var index = m_mapGrid.GetMapInfo().GridCoordinate2Index(new Vector2Int(i, j));
-            var rows = m_mapGrid.GetMapInfo().m_rows;
-            var columns = m_mapGrid.GetMapInfo().m_columns;
+            var rows = m_mapGrid.GetMapInfo().GetGridRows();
+            var columns = m_mapGrid.GetMapInfo().GetGridColumns();
             if(i<0||j<0||i>=rows||j>=columns|| board[index] != 0)
                 return;
             board[index] = -9999;

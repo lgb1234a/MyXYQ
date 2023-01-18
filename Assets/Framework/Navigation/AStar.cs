@@ -52,7 +52,7 @@ namespace Framework
         static int FACTOR_DIAGONAL = 14;
 
         // 展示的数据
-        MapInfo m_map;
+        IMapInfo m_map;
         // 初始数据
         int[] m_originMap;
         Vector2Int m_mapSize;
@@ -64,9 +64,10 @@ namespace Framework
 
         Node m_destinationNode;
 
-        public void Init(MapInfo map, Vector2Int mapSize, EvaluationFunctionType type = EvaluationFunctionType.Diagonal) {
+        // 其实这里不应该持有map类实例，应该制定一个接口，外部传入任何符合接口标准的实例对象均可，方便后续的扩展
+        public void Init(IMapInfo map, Vector2Int mapSize, EvaluationFunctionType type = EvaluationFunctionType.Diagonal) {
             m_map = map;
-            m_originMap = map.m_gridValues.Clone() as int[];
+            m_originMap = map.GetGridValues().Clone() as int[];
             m_mapSize = mapSize;
             m_evaluationFunctionType = type;
         }
