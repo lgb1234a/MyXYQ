@@ -6,6 +6,7 @@ namespace Framework
     public class MapGrid : MonoBehaviour {
         private bool m_isShow = true;
         private IMapInfo m_mapInfo;
+        public bool m_editMode;
 
         void InitMapData() {
             string path = Environment.GetMapJsonDataPath(transform.GetChild(0).name);

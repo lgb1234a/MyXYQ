@@ -8,20 +8,23 @@ namespace FrameworkEditor
     [CustomEditor(typeof(MapGrid))]
     public class MapGridInspectorEditor : Editor {
         private MapGrid m_mapGrid;
-        private bool m_editMode;
+        private SerializedObject m_mapGridObj;
+        private SerializedProperty m_editModeProperty;
         private int m_gridValue;
 
         private string m_exportFileName;
         private string m_importFileName;
         void OnEnable() {
             m_mapGrid = target as MapGrid;
+            m_mapGridObj = new SerializedObject(target);
+            m_editModeProperty = m_mapGridObj.FindProperty("m_editMode");
             var spriteRenderer = m_mapGrid.transform.GetChild(0);
             m_exportFileName = spriteRenderer.name;
             m_importFileName = spriteRenderer.name;
         }
 
         void OnSceneGUI() {
-            if (m_editMode) {
+            if (m_mapGrid.m_editMode) {
                 HandleUtility.AddDefaultControl(GUIUtility.GetControlID(FocusType.Passive));
                 m_mapGrid.Show();
                 Event e = Event.current;
@@ -52,7 +55,8 @@ namespace FrameworkEditor
         }
 
         public override void OnInspectorGUI() {
-            m_editMode = EditorGUILayout.Toggle("EditMode", m_editMode);
+            EditorGUILayout.PropertyField(m_editModeProperty);
+
             m_gridValue = EditorGUILayout.IntSlider("GridValue", m_gridValue, 1, 2);
             EditorGUILayout.Space(10f);
 
@@ -86,6 +90,8 @@ namespace FrameworkEditor
                 m_mapGrid.ClearFlags();
                 UnityEditorInternal.InternalEditorUtility.RepaintAllViews();
             }
+
+            m_mapGridObj.ApplyModifiedProperties();
         }
 
 
