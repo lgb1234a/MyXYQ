@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 namespace Framework
 {
     public static class Vector2Extension {

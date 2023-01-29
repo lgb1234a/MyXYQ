@@ -64,7 +64,6 @@ namespace Framework
 
         Node m_destinationNode;
 
-        // 其实这里不应该持有map类实例，应该制定一个接口，外部传入任何符合接口标准的实例对象均可，方便后续的扩展
         public void Init(IMapInfo map, Vector2Int mapSize, EvaluationFunctionType type = EvaluationFunctionType.Diagonal) {
             m_map = map;
             m_originMap = map.GetGridValues().Clone() as int[];

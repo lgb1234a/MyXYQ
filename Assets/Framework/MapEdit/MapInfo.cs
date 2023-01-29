@@ -27,6 +27,66 @@ namespace Framework {
             m_columns = columns;
         }
 
+        public void ClearPath()
+        {
+            int count = GetGridValues().Length;
+            for(int i = 0; i < count; i++) {
+                if (IsIndexPath(i)) {
+                    GetGridValues()[i] = 0;
+                }
+            }
+        }
+
+        /// excludeCoordinate避免往回索引已经遍历过的点导致死循环
+        public Vector2Int GetNextPathTo(Vector2Int coordinate, Vector2Int excludeCoordinate)
+        {
+            var left = new Vector2Int(coordinate.x-1, coordinate.y);
+            if (IsCoordinatePath(left) && left != excludeCoordinate)
+                return left;
+
+            var right = new Vector2Int(coordinate.x+1, coordinate.y);
+            if (IsCoordinatePath(right) && right != excludeCoordinate)
+                return right;
+
+            var top = new Vector2Int(coordinate.x, coordinate.y+1);
+            if (IsCoordinatePath(top) && top != excludeCoordinate)
+                return top;
+
+            var bottom = new Vector2Int(coordinate.x, coordinate.y-1);
+            if (IsCoordinatePath(bottom) && bottom != excludeCoordinate)
+                return bottom;
+
+            var leftTop = new Vector2Int(coordinate.x-1, coordinate.y+1);
+            if (IsCoordinatePath(leftTop) && leftTop != excludeCoordinate)
+                return leftTop;
+
+            var leftBottom = new Vector2Int(coordinate.x-1, coordinate.y-1);
+            if (IsCoordinatePath(leftBottom) && leftBottom != excludeCoordinate)
+                return leftBottom;
+
+            var rightTop = new Vector2Int(coordinate.x+1, coordinate.y+1);
+            if (IsCoordinatePath(rightTop) && rightTop != excludeCoordinate)
+                return rightTop;
+
+            var rightBottom = new Vector2Int(coordinate.x+1, coordinate.y-1);
+            if (IsCoordinatePath(rightBottom) && rightBottom != excludeCoordinate)
+                return rightBottom;
+            return Vector2Int.zero;
+        }
+
+
+        public bool CanMove(Transform character, Vector2 destination) {
+            var translation = new Vector3(destination.x, destination.y, 0) - character.position;
+            translation = translation.normalized * Math.Min(m_gridWidth, m_gridHeight);
+            var characterCoordinate = WorldPosition2GridCoordinate(character.position);
+            var nextLocation = character.position + translation;
+            var nextCoordinate = WorldPosition2GridCoordinate(nextLocation);
+            if (IsCoordinateObstacle(nextCoordinate)) {
+                return false;
+            }
+            return true;
+        }
+
         public int[] GetGridValues() {
             return m_gridValues;
         }
@@ -79,6 +139,11 @@ namespace Framework {
             int x = index/m_rows;
             int y = index%m_columns;
             return new Vector2Int(x, y);
+        }
+
+        public Vector2 GridCoordinate2WorldPosition(Vector2Int coordinate) {
+            var idx = GridCoordinate2Index(coordinate);
+            return GridIndex2WorldPosition(idx);
         }
 
         public int GridCoordinate2Index(Vector2Int coordinate) {

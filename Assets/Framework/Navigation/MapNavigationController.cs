@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 namespace Framework
 {
@@ -20,6 +21,7 @@ namespace Framework
         bool m_inSettingDestinationLocation;
         Vector2Int m_playerLocation;
         Vector2Int m_destinationLocation;
+        List<string> m_pathFlagGONames = new List<string>();
 
         void Start() {
             m_setPlayerLocationBtn.onClick.AddListener(OnClickedPlayerLocationBtn);
@@ -28,8 +30,7 @@ namespace Framework
 
             // 初始化A*
             m_aStar = new AStar();
-            string path = Environment.GetMapJsonDataPath(name);
-            m_mapInfo = TextAssetRWAblity.ImportFromFile<MapInfo>(path);
+            m_mapInfo = LevelManager.Instance.GetMapInfo();
 
             var mapSize = new Vector2Int(m_mapInfo.GetGridRows(), m_mapInfo.GetGridColumns());
             m_aStar.Init(m_mapInfo, mapSize, m_evaluationFunctionType);
@@ -71,6 +72,7 @@ namespace Framework
             var go = InstantiateFlag(m_pathFlag, new Vector3(position.x, position.y));
             var coordinate = m_mapInfo.WorldPosition2GridCoordinate(position);
             go.name = GetFlagName(coordinate);
+            m_pathFlagGONames.Add(go.name);
         }
 
         void InstantiateObstacleFlag(Vector2 position) {
@@ -91,17 +93,17 @@ namespace Framework
             UnityEngine.Object.DestroyImmediate(go);
         }
 
-        void ClearPath() {
-            int count = m_mapInfo.GetGridValues().Length;
-            for(int i = 0; i < count; i++) {
-                if (m_mapInfo.IsIndexPath(i)) {
-                    m_mapInfo.GetGridValues()[i] = 0;
-                    var coordinate = m_mapInfo.GridIndex2Coordinate(i);
-                    DestroyGameObjectByName(GetFlagName(coordinate));
-                }
+        void DestoryFlagGosInMap() {
+            foreach(var goName in m_pathFlagGONames) {
+                DestroyGameObjectByName(goName);
             }
             // 因为当目标点在不可走区域时不能被标记为路径点，所以需要单独销毁目标点的标记object
             DestroyGameObjectByName(GetFlagName(m_destinationLocation));
+        }
+
+        void ClearPath() {
+            m_mapInfo.ClearPath();
+            DestoryFlagGosInMap();
         }
 
         void ShowObstacles() {

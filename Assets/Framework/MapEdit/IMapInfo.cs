@@ -18,9 +18,17 @@ namespace Framework {
 
         public Vector2Int WorldPosition2GridCoordinate(Vector2 position);
 
+        public Vector2 GridCoordinate2WorldPosition(Vector2Int coordinate);
+
         public int GridCoordinate2Index(Vector2Int coordinate);
 
         public Vector2 GridIndex2WorldPosition(int index);
+
+        public void ClearPath();
+
+        public Vector2Int GetNextPathTo(Vector2Int coordinate, Vector2Int excludeCoordinate);
+
+        public bool CanMove(Transform character, Vector2 destination);
 
         public int[] GetGridValues();
 
