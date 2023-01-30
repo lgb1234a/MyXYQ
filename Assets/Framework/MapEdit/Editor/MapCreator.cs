@@ -53,20 +53,27 @@ namespace FrameworkEditor
 
                 GameObject mapRenderer = new GameObject(m_mapName);
                 var sr = mapRenderer.AddComponent<SpriteRenderer>();
-                var mapNavigationController = mapRenderer.AddComponent<MapNavigationController>();
-                mapNavigationController.m_setPlayerLocationBtn = GameObject.Find("SetPlayerLocationBtn").GetComponent<Button>();
-                mapNavigationController.m_setDestinationBtn = GameObject.Find("SetDestinationLocationBtn").GetComponent<Button>();
-                mapNavigationController.m_aStarButton = GameObject.Find("AStarBtn").GetComponent<Button>();
-                mapNavigationController.m_pathFlag = GameObject.Find("PathFlag");
-                mapNavigationController.m_obstacleFlag = GameObject.Find("ObstalceFlag");
+                // var mapNavigationController = mapRenderer.AddComponent<MapNavigationController>();
+                // mapNavigationController.m_setPlayerLocationBtn = GameObject.Find("SetPlayerLocationBtn").GetComponent<Button>();
+                // mapNavigationController.m_setDestinationBtn = GameObject.Find("SetDestinationLocationBtn").GetComponent<Button>();
+                // mapNavigationController.m_aStarButton = GameObject.Find("AStarBtn").GetComponent<Button>();
+                // mapNavigationController.m_pathFlag = GameObject.Find("PathFlag");
+                // mapNavigationController.m_obstacleFlag = GameObject.Find("ObstalceFlag");
+                // 添加要检测射线的碰撞器
+                var bc = mapRenderer.AddComponent<BoxCollider>();
+                bc.size = new Vector3(m_mapTexture.width*0.01f, m_mapTexture.height*0.01f, 0.2f);
+                bc.center = new Vector3(bc.size.x*0.5f,  bc.size.y*0.5f, 0f);
 
                 // 设置要渲染的地图
                 sr.sprite = Sprite.Create(m_mapTexture, new Rect(0,0,m_mapTexture.width,m_mapTexture.height),Vector2.zero);
                 mapRenderer.transform.SetParent(map.transform);
-                // 添加要检测射线的碰撞器
-                var bc = map.AddComponent<BoxCollider>();
-                bc.size = new Vector3(m_mapTexture.width*0.01f, m_mapTexture.height*0.01f, 0.2f);
-                bc.center = new Vector3(bc.size.x*0.5f,  bc.size.y*0.5f, 0f);
+                // 添加vc相机的边缘检测碰撞
+                var pc = map.AddComponent<PolygonCollider2D>();
+                pc.points = new Vector2[] {
+                    Vector2.zero, 
+                    new Vector2(m_mapTexture.width*0.01f, 0), 
+                    new Vector2(m_mapTexture.width*0.01f, m_mapTexture.height*0.01f), 
+                    new Vector2(0, m_mapTexture.height*0.01f)};
                 // 设置网格参数并初始化
                 m_mapGrid = map.AddComponent<MapGrid>();
                 m_mapGrid.RecalculateGridData(sr.sprite.bounds.size, m_rows, m_columns);
