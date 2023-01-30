@@ -112,6 +112,7 @@ public static class ToLuaExport
     public static HashSet<Type> eventSet = new HashSet<Type>();
     public static List<Type> extendList = new List<Type>();    
 
+    // 不会导出到lua的成员函数
     public static List<string> memberFilter = new List<string>
     {
         "String.Chars",
@@ -166,7 +167,11 @@ public static class ToLuaExport
         "KeyValuePair.Deconstruct",
         "ParticleSystem.SetJob",
         "ParticleSystem.subEmitters", /*2019.09 ios编译出错，也可能是unity版本问题*/
-        "Type.IsSZArray"
+        "Type.IsSZArray",
+        "MeshRenderer.scaleInLightmap",
+        "MeshRenderer.receiveGI",
+        "MeshRenderer.stitchLightmapSeams",
+        "QualitySettings.GetAllRenderPipelineAssetsForPlatform",
     };
 
     class _MethodBase

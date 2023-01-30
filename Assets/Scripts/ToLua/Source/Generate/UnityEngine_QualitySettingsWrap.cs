@@ -14,7 +14,6 @@ public class UnityEngine_QualitySettingsWrap
 		L.RegFunction("GetRenderPipelineAssetAt", GetRenderPipelineAssetAt);
 		L.RegFunction("GetQualityLevel", GetQualityLevel);
 		L.RegFunction("GetQualitySettings", GetQualitySettings);
-		L.RegFunction("GetAllRenderPipelineAssetsForPlatform", GetAllRenderPipelineAssetsForPlatform);
 		L.RegFunction("__eq", op_Equality);
 		L.RegVar("pixelLightCount", get_pixelLightCount, set_pixelLightCount);
 		L.RegVar("shadows", get_shadows, set_shadows);
@@ -217,24 +216,6 @@ public class UnityEngine_QualitySettingsWrap
 			ToLua.CheckArgsCount(L, 0);
 			UnityEngine.Object o = UnityEngine.QualitySettings.GetQualitySettings();
 			ToLua.Push(L, o);
-			return 1;
-		}
-		catch (Exception e)
-		{
-			return LuaDLL.toluaL_exception(L, e);
-		}
-	}
-
-	[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
-	static int GetAllRenderPipelineAssetsForPlatform(IntPtr L)
-	{
-		try
-		{
-			ToLua.CheckArgsCount(L, 2);
-			string arg0 = ToLua.CheckString(L, 1);
-			System.Collections.Generic.List<UnityEngine.Rendering.RenderPipelineAsset> arg1 = (System.Collections.Generic.List<UnityEngine.Rendering.RenderPipelineAsset>)ToLua.CheckObject(L, 2, typeof(System.Collections.Generic.List<UnityEngine.Rendering.RenderPipelineAsset>));
-			UnityEngine.QualitySettings.GetAllRenderPipelineAssetsForPlatform(arg0, ref arg1);
-			ToLua.PushSealed(L, arg1);
 			return 1;
 		}
 		catch (Exception e)

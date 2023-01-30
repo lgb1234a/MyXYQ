@@ -5,6 +5,7 @@ using System.IO;
 namespace Framework
 {
     public class TextAssetRWAblity {
+#if UNITY_EDITOR
         public static void ExportToFile(object obj, string path) {
             if (!File.Exists(path)) {
                 FileStream fs = new FileStream(path, FileMode.Create, FileAccess.ReadWrite);
@@ -15,13 +16,17 @@ namespace Framework
             File.WriteAllText(path, content);
             AssetDatabase.Refresh();
         }
+#endif
 
         public static T ImportFromFile<T>(string path) {
             if (!File.Exists(path)) {
                 return default;
             }
-
+#if UNITY_EDITOR
             UnityEngine.Object textObj = AssetDatabase.LoadMainAssetAtPath(path);
+#else
+            UnityEngine.Object textObj = Resources.Load(path);
+#endif
             TextAsset textAsset = TextAsset.Instantiate<TextAsset>(textObj as TextAsset);
             return JsonSerializablity.Deserialize<T>(textAsset.text);
         }
