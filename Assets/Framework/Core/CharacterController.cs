@@ -8,6 +8,7 @@ namespace Framework
     public class CharacterController : MonoBehaviour
     {
         public float m_speed = 1.0f;
+        public Animator m_animator;
         private Queue<Vector2> m_pathLocations = new Queue<Vector2>();
         private Coroutine m_currentMove;
         // Start is called before the first frame update
@@ -69,8 +70,8 @@ namespace Framework
             RaycastHit hitInfo;
             if (Physics.Raycast(ray, out hitInfo, 200f)) {
                 if (LevelManager.Instance.CanMove(transform, hitInfo.point)) {
-                    var translation = hitInfo.point - transform.position;
-                    transform.Translate(translation.normalized * m_speed * Time.deltaTime);
+                    var movement = hitInfo.point - transform.position;
+                    TranslateTransform(movement);
                 }
             }
             yield return new WaitForEndOfFrame();
@@ -92,7 +93,7 @@ namespace Framework
 
         IEnumerator Move(Vector3 movement) {
             while(true) {
-                transform.Translate(movement.normalized * m_speed * Time.deltaTime);
+                TranslateTransform(movement);
                 yield return new WaitForEndOfFrame();
             }
         }
@@ -100,9 +101,10 @@ namespace Framework
         IEnumerator FixEndLocationDeviation(Vector2 destination) {
             while(!IsArrived(destination)) {
                 var movement = new Vector3(destination.x, destination.y, 0) - transform.position;
-                transform.Translate(movement.normalized * m_speed * Time.deltaTime);
+                TranslateTransform(movement);
                 yield return new WaitForEndOfFrame();
             }
+            TriggerIdleAnimator();
         }
 
         bool IsArrived(Vector2 destination) {
@@ -111,6 +113,21 @@ namespace Framework
             var minOffsetY = gridSize.y*0.1f;
             return Math.Abs(destination.x - transform.position.x) < minOffsetX 
             && Math.Abs(destination.y - transform.position.y) < minOffsetY;
+        }
+
+        void TranslateTransform(Vector3 movement) {
+            transform.Translate(movement.normalized * m_speed * Time.deltaTime);
+            TriggerRunAnimator(movement);
+        }
+
+        void TriggerRunAnimator(Vector3 movement) {
+            m_animator.SetBool("IsIdle", false);
+            m_animator.SetFloat("X", movement.normalized.x);
+            m_animator.SetFloat("Y", movement.normalized.y);
+        }
+
+        void TriggerIdleAnimator() {
+            m_animator.SetBool("IsIdle", true);
         }
     }
 }
