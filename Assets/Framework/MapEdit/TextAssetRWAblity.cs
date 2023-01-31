@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEditor;
+using System;
 using System.IO;
 
 namespace Framework
@@ -19,14 +20,13 @@ namespace Framework
 #endif
 
         public static T ImportFromFile<T>(string path) {
-            if (!File.Exists(path)) {
-                return default;
-            }
 #if UNITY_EDITOR
             UnityEngine.Object textObj = AssetDatabase.LoadMainAssetAtPath(path);
 #else
-            UnityEngine.Object textObj = Resources.Load(path);
+            var filePath = PathUtility.GetResourcesRelativePath(path);
+            UnityEngine.Object textObj = Resources.Load(filePath);
 #endif
+            
             TextAsset textAsset = TextAsset.Instantiate<TextAsset>(textObj as TextAsset);
             return JsonSerializablity.Deserialize<T>(textAsset.text);
         }
