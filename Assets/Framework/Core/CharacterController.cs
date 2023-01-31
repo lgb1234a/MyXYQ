@@ -101,7 +101,7 @@ namespace Framework
         IEnumerator FixEndLocationDeviation(Vector2 destination) {
             while(!IsArrived(destination)) {
                 var movement = new Vector3(destination.x, destination.y, 0) - transform.position;
-                TranslateTransform(movement);
+                TranslateTransform(movement, false);
                 yield return new WaitForEndOfFrame();
             }
             TriggerIdleAnimator();
@@ -115,9 +115,10 @@ namespace Framework
             && Math.Abs(destination.y - transform.position.y) < minOffsetY;
         }
 
-        void TranslateTransform(Vector3 movement) {
+        void TranslateTransform(Vector3 movement, bool updateRunAnimator = true) {
             transform.Translate(movement.normalized * m_speed * Time.deltaTime);
-            TriggerRunAnimator(movement);
+            if (updateRunAnimator)
+                TriggerRunAnimator(movement);
         }
 
         void TriggerRunAnimator(Vector3 movement) {
