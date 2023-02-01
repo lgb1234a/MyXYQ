@@ -6,8 +6,9 @@ namespace Framework
     public class CursorManager : MonoBehaviour
     {
         public Texture2D[] m_cursors;
-        public float cursorAnimInterval = 0.1f;
-        private int cursorIndex = 0;
+        private int m_cursorIndex = 0;
+        private int m_cursorCounter = 0;
+        const int __CursorAnimFramesInterval = 6;
 
         public UnityEngine.Object m_cursorEffectPrefab;
         public Transform m_cursorEffectParent;
@@ -16,7 +17,6 @@ namespace Framework
         // Start is called before the first frame update
         void Start()
         {
-            StartCoroutine(UpdateCursorTexture());
         }
 
         // Update is called once per frame
@@ -24,6 +24,16 @@ namespace Framework
         {
             if (!GameManager.Instance.m_inFight)
                 UpdateCursorClickEffect();
+            
+            UpdateCursorCounter();
+            if (m_cursorCounter%__CursorAnimFramesInterval == 0)
+                UpdateCursorTexture();
+        }
+
+        void UpdateCursorCounter() {
+            m_cursorCounter++;
+            if (m_cursorCounter > __CursorAnimFramesInterval) 
+                m_cursorCounter = 0;
         }
 
         void UpdateCursorClickEffect() {
@@ -55,13 +65,10 @@ namespace Framework
             yield return new WaitForEndOfFrame();
         }
 
-        IEnumerator UpdateCursorTexture() {
-            while(true) {
-                cursorIndex = cursorIndex%m_cursors.Length;
-                Cursor.SetCursor(m_cursors[cursorIndex], Vector2.zero, CursorMode.Auto);
-                cursorIndex++;
-                yield return new WaitForSeconds(cursorAnimInterval);
-            }
+        void UpdateCursorTexture() {
+            m_cursorIndex = m_cursorIndex%m_cursors.Length;
+            Cursor.SetCursor(m_cursors[m_cursorIndex], Vector2.zero, CursorMode.Auto);
+            m_cursorIndex++;
         }
     }
 }

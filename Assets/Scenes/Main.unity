@@ -310,8 +310,8 @@ Camera:
   m_GameObject: {fileID: 401653657}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_ClearFlags: 2
+  m_BackGroundColor: {r: 1, g: 1, b: 1, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -337,11 +337,11 @@ Camera:
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
   m_TargetEye: 3
-  m_HDR: 1
-  m_AllowMSAA: 1
+  m_HDR: 0
+  m_AllowMSAA: 0
   m_AllowDynamicResolution: 0
   m_ForceIntoRT: 0
-  m_OcclusionCulling: 1
+  m_OcclusionCulling: 0
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
 --- !u!4 &401653660
@@ -383,7 +383,6 @@ MonoBehaviour:
   - {fileID: 2800000, guid: 1b04ed521813e1b428d64158183fbd91, type: 3}
   - {fileID: 2800000, guid: 3f2e77c6aa2ee5046b1a82c9373e1d41, type: 3}
   - {fileID: 2800000, guid: 4302c1da77bb7a543ac6800465f7db56, type: 3}
-  cursorAnimInterval: 0.1
   m_cursorEffectPrefab: {fileID: 271816662820097067, guid: 6aade8e4f1d359348adaa7fcd19ca058, type: 3}
   m_cursorEffectParent: {fileID: 848275127}
   m_mouseDownInterval: 0
