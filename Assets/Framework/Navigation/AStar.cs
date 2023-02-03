@@ -85,7 +85,7 @@ namespace Framework
                 yield return null;
             }
             if(m_destinationNode == null)
-                Debug.LogError("找不到可用路径");
+                FrameDebugger.Instance.Log("找不到可用路径");
             else
                 ShowPath(m_destinationNode);
         }

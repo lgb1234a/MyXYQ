@@ -1,5 +1,4 @@
 using UnityEngine;
-using System.Collections;
 
 namespace Framework
 {
@@ -39,7 +38,7 @@ namespace Framework
         void UpdateCursorClickEffect() {
             if(Input.GetMouseButtonDown(0)) {
                 GameManager.Instance.m_inAutoMoveState = false;
-                StartCoroutine(CreateMouseTrackEffect());
+                CreateMouseTrackEffect();
             }
             else if (Input.GetMouseButton(0)) {
                 m_mouseDownInterval += Time.deltaTime;
@@ -52,17 +51,17 @@ namespace Framework
             }
 
             if (GameManager.Instance.m_inAutoMoveState) {
-                StartCoroutine(CreateMouseTrackEffect());
+                if (Time.frameCount%2 == 0) {
+                    CreateMouseTrackEffect();
+                }
             }
         }
 
-        IEnumerator CreateMouseTrackEffect() {
+        void CreateMouseTrackEffect() {
             var worldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             var position = m_cursorEffectParent.InverseTransformPoint(worldPos);
             position.z = -0.9f;
             var effectGO = Instantiate(m_cursorEffectPrefab, position, Quaternion.identity, m_cursorEffectParent) as GameObject;
-            yield return new WaitForEndOfFrame();
-            yield return new WaitForEndOfFrame();
         }
 
         void UpdateCursorTexture() {

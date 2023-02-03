@@ -2,6 +2,7 @@ using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Framework
 {
@@ -54,10 +55,20 @@ namespace Framework
             RaycastHit hitInfo;
             if (Physics.Raycast(ray, out hitInfo, 200f)) {
                 var movement = hitInfo.point - transform.position;
-                if (LevelManager.Instance.CanMove(transform, hitInfo.point)) {
-                    TranslateTransform(movement);
-                }else {
-                    TriggerRunAnimator(movement);
+                TriggerRunAnimator(movement);
+
+                if (LevelManager.Instance.IsCoordinateObstacle(hitInfo.point)) {
+                    if (LevelManager.Instance.CanMove(transform, hitInfo.point)) {
+                        TranslateTransform(movement);
+                    }
+                } 
+                else{
+                    var paths = LevelManager.Instance.Navigate(transform.position, hitInfo.point);
+                    if (paths.Count() > 0) {
+                        var nextPath = paths.First();
+                        movement = new Vector3(nextPath.x, nextPath.y, 0) - transform.position;
+                        TranslateTransform(movement);
+                    }
                 }
             }
         }

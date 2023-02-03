@@ -79,5 +79,10 @@ namespace Framework
         public Vector2 GetGridSize() {
             return new Vector2(m_mapInfo.GetGridWidth(), m_mapInfo.GetGridHeight());
         }
+
+        public bool IsCoordinateObstacle(Vector2 destination) {
+            var destCoordinate = m_mapInfo.WorldPosition2GridCoordinate(destination);
+            return m_mapInfo.IsCoordinateObstacle(destCoordinate);
+        }
     }
 }

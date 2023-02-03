@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -36,7 +35,13 @@ namespace Framework
         }
 
         public void Log(string content) {
-            m_consoleLogText.text = content;
+            m_consoleLogText.text = DecorateLog(content);
+        }
+
+        string DecorateLog(string log)
+        {
+            DateTime dt = DateTime.Now;
+            return dt.ToString("[ LOG ][yyyy-MM-dd hh:mm:ss fff] ") + log;
         }
     }
 }

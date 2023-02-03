@@ -132,7 +132,11 @@ namespace Framework {
         }
 
         public int GetGridValue(Vector2Int coordinate) {
-            return m_gridValues[GridCoordinate2Index(coordinate)];
+            var idx = GridCoordinate2Index(coordinate);
+            if (idx < m_gridValues.Length) {
+                return m_gridValues[idx];
+            }
+            return Default_Value;
         }
 
         public Vector2Int GridIndex2Coordinate(int index) {
