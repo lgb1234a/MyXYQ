@@ -1,8 +1,8 @@
 using UnityEngine;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.EventSystems;
 
 namespace Framework
 {
@@ -12,7 +12,14 @@ namespace Framework
         public Animator m_animator;
         private Queue<Vector2> m_pathLocations = new Queue<Vector2>();
         private Vector2 m_nextMoveLocation = Vector2.left;
+        private int m_fingerID = -1;
 
+        private void Awake()
+        {
+        #if !UNITY_EDITOR
+            m_fingerID = 0;
+        #endif
+        }
         // Update is called once per frame
         void Update()
         {
@@ -21,15 +28,18 @@ namespace Framework
         }
 
         void HandleMouseClicked() {
-            if (!GameManager.Instance.m_inFight) {
-                if (Input.GetMouseButtonDown(0)) {
-                    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                    RaycastHit hitInfo;
-                    if (Physics.Raycast(ray, out hitInfo, 200f)) {
-                        var paths = LevelManager.Instance.Navigate(transform.position, hitInfo.point);
-                        TriggerIdleAnimator();
-                        EnqueuePathLocations(paths);
-                    }
+            if (GameManager.Instance.m_inFight)
+                return;
+            if (EventSystem.current.IsPointerOverGameObject(m_fingerID))
+                return;
+
+            if (Input.GetMouseButtonDown(0)) {
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                RaycastHit hitInfo;
+                if (Physics.Raycast(ray, out hitInfo, 200f)) {
+                    var paths = LevelManager.Instance.Navigate(transform.position, hitInfo.point);
+                    TriggerIdleAnimator();
+                    EnqueuePathLocations(paths);
                 }
             }
         }

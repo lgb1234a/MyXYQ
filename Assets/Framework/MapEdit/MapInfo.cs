@@ -78,7 +78,6 @@ namespace Framework {
         public bool CanMove(Transform character, Vector2 destination) {
             var translation = new Vector3(destination.x, destination.y, 0) - character.position;
             translation = translation.normalized * Math.Min(m_gridWidth, m_gridHeight);
-            var characterCoordinate = WorldPosition2GridCoordinate(character.position);
             var nextLocation = character.position + translation;
             var nextCoordinate = WorldPosition2GridCoordinate(nextLocation);
             if (IsCoordinateObstacle(nextCoordinate)) {

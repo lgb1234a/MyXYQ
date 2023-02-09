@@ -6,6 +6,7 @@ namespace Framework
 {
     public class LevelManager
     {
+        public GameObject m_character;
         private LevelInfo m_currentLevel;
         private IMapInfo m_mapInfo;
         private AStar m_aStar;
@@ -33,6 +34,8 @@ namespace Framework
 
             var mapSize = new Vector2Int(m_mapInfo.GetGridRows(), m_mapInfo.GetGridColumns());
             m_aStar.Init(m_mapInfo, mapSize, EvaluationFunctionType.Manhattan);
+
+            m_character = GameObject.FindGameObjectWithTag("Player");
         }
 
         private string GetCurrentLevelMapName()
@@ -83,6 +86,10 @@ namespace Framework
         public bool IsCoordinateObstacle(Vector2 destination) {
             var destCoordinate = m_mapInfo.WorldPosition2GridCoordinate(destination);
             return m_mapInfo.IsCoordinateObstacle(destCoordinate);
+        }
+
+        public Vector2Int GetCharacterCurrentCoordinate() {
+            return m_mapInfo.WorldPosition2GridCoordinate(m_character.transform.position);
         }
     }
 }
